@@ -1,0 +1,16 @@
+1. Adım: Sanal Ortamı Aktifleştirin
+Aşağıdaki komutu çalıştırın (Komutu girdikten sonra terminal satırının en başında yeşil yazıyla (.venv) ibaresini görmelisiniz):
+
+.\.venv\Scripts\Activate.ps1
+
+
+2. Adım: Gerekli Paketlerin Sanal Ortamda Olduğunu Garantileyin
+Sanal ortamdayken şu komutla PyInstaller'ı ve uygulamanın bağlı olduğu ana kütüphaneleri hızlıca tazeleyin:
+
+pip install pyinstaller pygame-ce numpy pillow
+
+3. Adım: Derlemeyi Sanal Ortamın İçinden Başlatın
+Baştaki py -m kısmını kaldırarak doğrudan sanal ortamın kendi PyInstaller'ı ile şu komutu çalıştırın:
+
+
+pyinstaller --name="ArapcaAsistani" --windowed --noconfirm --clean --icon="ui\app_icon.ico" --add-data="data;data" --add-data="assets;assets" --add-data="ui;ui" --add-data="version.json;." --hidden-import="pygame" --hidden-import="PIL" --hidden-import="numpy" --collect-all="faster_whisper" --collect-all="sounddevice" --collect-all="edge_tts" --exclude-module="torch" --exclude-module="pandas" --exclude-module="matplotlib" --exclude-module="cv2" --exclude-module="yt_dlp" app.py

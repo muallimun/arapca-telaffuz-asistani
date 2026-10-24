@@ -11,13 +11,17 @@ Repo: https://github.com/muallimun/arapca-telaffuz-asistani
 
 import os
 import sys
+import multiprocessing
 
-# Sanal ortam (.venv) yönlendirmesi tüm üçüncü parti importlardan ÖNCE çalışmalıdır
+# 1) PyInstaller (.exe) çoklu işlem kilidi — yeni pencere çoğalmasını kesin olarak engeller
+# 2) Sanal ortam (.venv) yönlendirmesi SADECE kaynak koddan (.py) çalışırken devreye girer
 if __name__ == "__main__":
-    _venv_python = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".venv", "Scripts", "python.exe")
-    if os.path.exists(_venv_python) and os.path.normcase(sys.executable) != os.path.normcase(_venv_python):
-        import subprocess
-        sys.exit(subprocess.call([_venv_python] + sys.argv))
+    multiprocessing.freeze_support()
+    if not getattr(sys, "frozen", False):
+        _venv_python = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".venv", "Scripts", "python.exe")
+        if os.path.exists(_venv_python) and os.path.normcase(sys.executable) != os.path.normcase(_venv_python):
+            import subprocess
+            sys.exit(subprocess.call([_venv_python] + sys.argv))
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ["OMP_NUM_THREADS"] = "4"
@@ -2957,13 +2961,38 @@ class App(DialogueModeMixin):
 
 if __name__ == "__main__":
     try:
-        # Windows Görev Çubuğuna özel uygulama kimliğini pencere açılmadan önce bildiriyoruz
+        import ctypes
+        # 1. Windows Görev Çubuğu Özel Uygulama Kimliği
         try:
-            import ctypes
             myappid = "muallimun.arapca_asistani.v40"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         except Exception:
             pass
+
+        # 2. Tek Örnek (Single Instance) Kilidi — Uygulama açıkken tekrar açılmasını engeller
+        _instance_mutex = ctypes.windll.kernel32.CreateMutexW(
+            None, False, "Muallimun_ArapcaAsistani_SingleInstance_Mutex_v40"
+        )
+        if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS (Zaten açık)
+            # Arkada kalan mevcut pencereyi bulup öne getir
+            hwnd = ctypes.windll.user32.FindWindowW(
+                None, f"Arapça Telaffuz ve Konuşma Asistanı v{APP_VERSION} — Muallimun.Net"
+            )
+            if hwnd:
+                ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE (Simge durumundaysa büyüt)
+                ctypes.windll.user32.SetForegroundWindow(hwnd)
+
+            _warn_root = tk.Tk()
+            _warn_root.withdraw()
+            _warn_root.attributes("-topmost", True)
+            messagebox.showwarning(
+                "Uygulama Zaten Açık",
+                "Arapça Telaffuz ve Konuşma Asistanı şu anda zaten çalışıyor!\n\n"
+                "Açık olan uygulama penceresi ekrana getirildi.",
+                parent=_warn_root
+            )
+            _warn_root.destroy()
+            sys.exit(0)
 
         root = tk.Tk()
         app = App(root)
@@ -2974,4 +3003,5 @@ if __name__ == "__main__":
     except Exception as main_ex:
         log_error("Ana uygulama çökme hatası", main_ex)
         traceback.print_exc()
-        input("\nKapatmak için Enter tuşuna basın...")
+        if not getattr(sys, "frozen", False) and sys.stdin is not None:
+            input("\nKapatmak için Enter tuşuna basın...")

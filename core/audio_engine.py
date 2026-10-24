@@ -27,37 +27,23 @@ from core.arabic_nlp import clean_invisible_marks
 
 
 # ==============================================================================
-# 1. C-MODÜL GÜVENLİK KONTROLÜ (WHISPER & SOUNDDEVICE)
+# 1. C-MODÜL GÜVENLİK KONTROLÜ (WHISPER & SOUNDDEVICE — .EXE UYUMLU DOĞRUDAN IMPORT)
 # ==============================================================================
-def _safe_check_c_module(mod_name: str) -> bool:
-    try:
-        res = subprocess.run(
-            [sys.executable, "-c", f"import {mod_name}"],
-            capture_output=True, text=True, timeout=15
-        )
-        return res.returncode == 0
-    except Exception as ex:
-        log_error(f"C modül kontrol hatası ({mod_name})", ex)
-        return False
-
-
 WHISPER_AVAILABLE: bool = False
 WhisperModel = None
-if _safe_check_c_module("faster_whisper"):
-    try:
-        from faster_whisper import WhisperModel
-        WHISPER_AVAILABLE = True
-    except Exception as ex:
-        log_error("Faster-Whisper import hatası", ex)
+try:
+    from faster_whisper import WhisperModel
+    WHISPER_AVAILABLE = True
+except Exception as ex:
+    log_error("Faster-Whisper import hatası", ex)
 
 AUDIO_REC_AVAILABLE: bool = False
 sd = None
-if _safe_check_c_module("sounddevice"):
-    try:
-        import sounddevice as sd
-        AUDIO_REC_AVAILABLE = True
-    except Exception as ex:
-        log_error("sounddevice import hatası", ex)
+try:
+    import sounddevice as sd
+    AUDIO_REC_AVAILABLE = True
+except Exception as ex:
+    log_error("sounddevice import hatası", ex)
 
 # Kısa kritik bölümler (load/play/stop) için kilit
 audio_lock = threading.Lock()
