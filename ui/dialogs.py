@@ -162,18 +162,20 @@ def _get_brand_logo_base64_html() -> str:
 # ==============================================================================
 def open_student_name_dialog(app, force_show: bool = False):
     """
-    Uygulama ilk açıldığında (ayarlar.db içinde 'student_name' boşsa) veya
-    kullanıcı ismini değiştirmek istediğinde açılan karşılama ve isim kayıt penceresi.
+    Uygulama açıldığında 'student_name' boşsa VEYA hala varsayılan 'Öğrenci' olarak
+    kalmışsa otomatik açılır; kullanıcı kendi adını girdiğinde bir sonraki açılışta sormaz.
     """
     current_name = (get_config_val("student_name", "") or "").strip()
-    if current_name and not force_show:
+    is_default_or_empty = (not current_name) or (current_name.lower() in ("öğrenci", "ogrenci"))
+
+    if not is_default_or_empty and not force_show:
         return
 
     c = app.colors
     win = tk.Toplevel(app.root)
     win.title("👤 Öğrenci / Kullanıcı Bilgisi — Muallimun.Net")
 
-    w_px, h_px = 540, 285
+    w_px, h_px = 540, 290
     sw = win.winfo_screenwidth()
     sh = win.winfo_screenheight()
     pos_x = max(0, (sw - w_px) // 2)
@@ -183,11 +185,13 @@ def open_student_name_dialog(app, force_show: bool = False):
     win.configure(bg=c["CARD_COLOR"])
     win.transient(app.root)
     win.grab_set()
+    win.lift()
+    win.focus_force()
 
     hdr = tk.Frame(win, bg=c["PANEL_COLOR"], padx=20, pady=12)
     hdr.pack(fill="x")
     tk.Label(
-        hdr, text="👋 HOŞ GELDİNİZ — KULLANICI KAYDI",
+        hdr, text="👋 HOŞ GELDİNİZ — ÖĞRENCİ / KULLANICI KAYDI",
         bg=c["PANEL_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 12, "bold")
     ).pack(side="left")
 
@@ -201,19 +205,18 @@ def open_student_name_dialog(app, force_show: bool = False):
         justify="left", anchor="w", wraplength=490
     ).pack(anchor="w", fill="x", pady=(0, 12))
 
-    name_var = tk.StringVar(value=current_name)
+    default_disp = current_name if current_name else "Öğrenci"
+    name_var = tk.StringVar(value=default_disp)
     ent_name = tk.Entry(
         body, textvariable=name_var, bg=c["BG_COLOR"], fg=c["TEXT_AR"],
         font=("Segoe UI", 13, "bold"), insertbackground=c["TEXT_MAIN"]
     )
     ent_name.pack(fill="x", ipady=5, pady=(0, 14))
     ent_name.focus_set()
+    ent_name.select_range(0, tk.END)
 
     def save_name(event=None):
-        val = name_var.get().strip()
-        if not val:
-            messagebox.showwarning("İsim Gerekli", "Lütfen devam etmek için adınızı girin.", parent=win)
-            return
+        val = name_var.get().strip() or "Öğrenci"
         set_config_val("student_name", val)
         if hasattr(app, "student_name_var"):
             app.student_name_var.set(val)
@@ -223,36 +226,45 @@ def open_student_name_dialog(app, force_show: bool = False):
         app._update_stats_ui()
         app._show_toast(f"👋 Hoş geldin {val}!", GREEN, 2500)
 
-    ent_name.bind("<Return>", save_name)
-    win.protocol("WM_DELETE_WINDOW", lambda: save_name() if name_var.get().strip() else (
-        set_config_val("student_name", "Öğrenci"),
+    def on_close_name_win():
+        val = name_var.get().strip() or "Öğrenci"
+        set_config_val("student_name", val)
+        if hasattr(app, "student_name_var"):
+            app.student_name_var.set(val)
         win.destroy()
-    ))
+        if getattr(app, "current_mode", "") == "home":
+            app._render_home_dashboard()
+
+    ent_name.bind("<Return>", save_name)
+    win.protocol("WM_DELETE_WINDOW", on_close_name_win)
 
     tk.Button(
         body, text="✅ KAYDET VE BAŞLA", command=save_name,
         bg=GREEN, fg="#0f172a", font=("Segoe UI", 11, "bold"),
         relief="flat", pady=8, cursor="hand2"
     ).pack(fill="x")
+
+
 # ==============================================================================
 # 0.1) 👋 7 ADIMLI KAPSAMLI İNTERAKTİF BAŞLANGIÇ TURU (ONBOARDING)
 # ==============================================================================
 def open_onboarding_tour(app, force_show: bool = False):
     """
-    Uygulamanın tüm ana özelliklerini (Ana Sayfa, Kelime & Gölgeleme, Sarf Sözlüğü,
-    Diyalog & Roleplay, Anahtar Cümleler & Dinle-Bul, Canlı Mahreç Koçu, Öğretmen & Ders Notu Araçları)
-    7 adımda tanıtan kapsamlı başlangıç turu.
+    Uygulamayı ilk kez açan bir kullanıcının 'Bu programın amacı nedir ve hangi ekranda
+    ne yapabilirim?' sorularına net, anlaşılır yanıt veren 7 adımlı başlangıç rehberi.
+    Tur kapandığında öğrenci ismi henüz girilmemişse ('Öğrenci' ise) isim penceresini açar.
     """
     if not force_show and get_config_val("onboarding_seen_v35", "0") == "1":
+        app.root.after(150, lambda: open_student_name_dialog(app, force_show=False))
         return
 
     c = app.colors
     is_dark = (app.theme_mode == "dark")
 
     win = tk.Toplevel(app.root)
-    win.title("👋 Hoş Geldiniz — 7 Adımda Kapsamlı Uygulama Turu")
-    win.geometry("760x500")
-    win.minsize(700, 460)
+    win.title("👋 Hoş Geldiniz — Uygulama Amacı ve Ekran Tanıtım Turu (7 Adım)")
+    win.geometry("780x520")
+    win.minsize(720, 480)
     win.configure(bg=c["CARD_COLOR"])
     win.transient(app.root)
     win.grab_set()
@@ -262,84 +274,90 @@ def open_onboarding_tour(app, force_show: bool = False):
 
     steps = [
         {
-            "badge": "ADIM 1 / 7 — ANA GİRİŞ EKRANI VE HIZLI DEVAM SİSTEMİ",
-            "icon": "🏛️  🚀  📍",
-            "title": "Ferah 2x2 Öğrenci Ekranı ve Kaldığınız Yerden Devam",
+            "badge": "ADIM 1 / 7 — UYGULAMANIN AMACI NEDİR?",
+            "icon": "🎙️  🕌  🤖",
+            "title": "Arapçayı Sadece Okuyarak Değil, Sesli Konuşarak Öğrenin!",
             "desc": (
-                "• 🏛️ Ana Sayfa üzerinde 4 temel öğrenme alanı yer alır: Görselli Kelimeler, Sarf Sözlüğü, "
-                "Günlük Diyaloglar ve Anahtar Cümleler.\n\n"
-                "• Üstteki '📍 Son Çalışılan' şeridindeki '▶️ Kaldığım Yerden Devam Et' butonuyla son çalıştığınız "
-                "moda ve pakete tek tıkla geri dönebilirsiniz."
+                "• Bu uygulamanın temel amacı; Arapça öğrenenlerin en çok zorlandığı 'doğru telaffuz etme (mahreç)', "
+                "'kelime köklerini tanıma (sarf)' ve 'akıcı konuşma (muhâdese)' becerilerini yapay zekâ desteğiyle geliştirmektir.\n\n"
+                "• Uygulamadaki tüm kelime, cümle ve diyalogları önce doğru referans sesle dinler, ardından mikrofona "
+                "kendiniz okursunuz. Yapay zekâ sesinizi analiz ederek doğrularınızı ve hatalarınızı anında ekranda gösterir."
             ),
-            "tip": "💡 İpucu: Üst çubuktaki ☀️/🌙 ikonuyla temayı değiştirebilir, '◧ Paneli Gizle' ile tam odak moduna geçebilirsiniz."
+            "tip": "💡 Üst menü çubuğundaki renkli butonları kullanarak istediğiniz çalışma ekranına her an geçiş yapabilirsiniz."
         },
         {
-            "badge": "ADIM 2 / 7 — GÖRSELLİ KELİME KARTLARI VE SESLİ TELAFFUZ",
-            "icon": "🏠  🎤  🗣️",
-            "title": "Dinleyin, Yeşil Çerçeve Parladığında Konuşun ve Gölgeleyin",
+            "badge": "ADIM 2 / 7 — 🏛️ ANA SAYFA EKRANINDA NE YAPABİLİRSİNİZ?",
+            "icon": "🏛️  📍  🔥",
+            "title": "Başlangıç Merkezini Kullanma ve Kaldığınız Yerden Devam Etme",
             "desc": (
-                "• 🔊 Kadın / Erkek butonlarıyla kelimenin doğru telaffuzunu dinleyin; 🎤 BAŞLA VE KONUŞ (veya Boşluk tuşu) ile okuyun.\n\n"
-                "• Kayıt başladığında kartın dış çerçevesi parlak yeşil renkte parlar. '🎧 Sesimi Dinle' ile kendi kaydınızı dinleyebilir, "
-                "'🗣️ Gölgele (Shadowing)' ile referans sesin hemen ardından aynı ritimle tekrar edebilirsiniz."
+                "• Uygulama açıldığında karşınıza gelen '🏛️ Ana Sayfa' sizin çalışma merkezinizdir.\n\n"
+                "• Sağ üst köşeden adınızı, günlük çalışma serinizi (🔥 Streak) ve puanınızı takip edebilir; "
+                "'▶️ Kaldığım Yerden Devam Et' butonuyla son çalıştığınız ekrana tek tıkla dönebilir veya ortadaki "
+                "4 büyük modül kartından bugün çalışmak istediğiniz bölümü seçebilirsiniz."
             ),
-            "tip": "💡 İpucu: Klavyeden [Boşluk / Space] tuşu kaydı başlatır/durdurur, [Sağ/Sol Ok] tuşları kart değiştirir."
+            "tip": "💡 İpucu: Sağ üstteki ☀️/🌙 butonuyla Aydınlık veya Karanlık temayı seçebilirsiniz."
         },
         {
-            "badge": "ADIM 3 / 7 — SARF SÖZLÜĞÜ, ALTIGEN KÖK ROZETİ VE TÜREV AĞACI",
+            "badge": "ADIM 3 / 7 — 🏠 KELİME MODU EKRANINDA NE YAPABİLİRSİNİZ?",
+            "icon": "🏠  🔊  🎤",
+            "title": "Kelimeleri Dinleyin, Mikrofona Okuyun ve Gölgeleme Yapın",
+            "desc": (
+                "• Üstten bir kelime paketi ve seviye (A1-C1) seçerek kelime kartlarıyla çalışacağınız ekrandır:\n"
+                "  1) '🔊 Kadın / Erkek' butonlarıyla kelimenin doğru telaffuzunu dinleyin.\n"
+                "  2) '🎤 BAŞLA VE KONUŞ' butonuna (veya Boşluk tuşuna) basıp yeşil çerçeve parladığında mikrofona okuyun.\n"
+                "  3) '🗣️ Gölgele' ile sesi duyduktan hemen sonra aynı ritimle tekrar etme antrenmanı yapın.\n"
+                "  4) '📅 Günün 15 Tekrarı' ile unutmak üzere olduğunuz kelimeleri akıllı sırayla tekrar edin."
+            ),
+            "tip": "💡 Kısayol: Klavyeden [Boşluk] tuşu ses kaydını başlatır, [Sağ / Sol Ok] tuşları sonraki/önceki karta geçer."
+        },
+        {
+            "badge": "ADIM 4 / 7 — 📖 SARF SÖZLÜĞÜ EKRANINDA NE YAPABİLİRSİNİZ?",
             "icon": "📖  🌿  🔍",
-            "title": "Sülâsî Kökleri ve Kelime Ailelerini Keşfedin",
+            "title": "Kelimelerin 3 Harfli Köklerini ve Türev Ailelerini Keşfedin",
             "desc": (
-                "• Sözlük paketlerinde her kelimenin üzerinde Altıgen Sülâsî Kök Rozeti (ك ت ب) ve tıklanabilir Türev Ağacı "
-                "(İsimlerde Müfret/Cemî; Fiillerde Mâzî/Muzâri/Masdar) yer alır.\n\n"
-                "• '📖 Sarf Sözlüğü' penceresinde sütun başlıklarına tıklayarak A➔Z veya Z➔A sıralama yapabilir ve "
-                "aynı kökten türeyen tüm akraba kelimeleri inceleyebilirsiniz."
+                "• Arapça kelimelerin hangi 3 asli harften (Sülâsî Kök) türediğini öğrenmek için kullanacağınız ekrandır.\n\n"
+                "• Bu ekranda 1.500+ kelime arasında arama ve sıralama yapabilir; isimlerin Tekil/Çoğul (Müfret/Cemî), "
+                "fiillerin ise Geçmiş/Şimdiki Zaman (Mâzî/Muzâri/Masdar) çekimlerini dinleyebilir, aynı kökten türeyen "
+                "akraba kelimeleri inceleyip '🎤 Bu Kelimeyi Kartta Çalış' diyerek telaffuz pratiğine geçebilirsiniz."
             ),
-            "tip": "💡 İpucu: Sarf terimlerinin üzerine fareyle geldiğinizde Türkçe açıklamaları (Tooltip) açılır."
+            "tip": "💡 İpucu: Kelime Modunda da sözlük paketlerini seçtiğinizde kart üzerinde Altıgen Kök Rozeti açılır."
         },
         {
-            "badge": "ADIM 4 / 7 — GÜNLÜK DİYALOGLAR (MUHÂDESÂT) VE ROL YAPMA",
-            "icon": "💬  🎭  💡",
-            "title": "Diyalogları Dinleyin ve Karşılıklı Konuşma Canlandırması Yapın",
+            "badge": "ADIM 5 / 7 — 💬 DİYALOG VE 📜 CÜMLE EKRANLARINDA NE YAPABİLİRSİNİZ?",
+            "icon": "💬  🎭  📜",
+            "title": "Karşılıklı Rol Yaparak Konuşun ve Cümle Telaffuzu Çalışın",
             "desc": (
-                "• 📖 Öğrenme Modunda diyaloğun tamamını veya tek tek satırları dinleyip telaffuz edebilirsiniz.\n\n"
-                "• 🎭 Ölçme / Canlandırma (Roleplay) Modunda bir karakter seçersiniz; karşı rolü uygulama seslendirir, "
-                "sıra size geldiğinde Türkçe çeviri gizlenir ve doğru söylediğiniz kelimeler anında yeşil renkte açılır."
+                "• 💬 Diyalog Modu Ekranı: '📖 Öğrenme Modu'nda günlük hayat diyaloglarını satır satır dinleyebilirsiniz. "
+                "'🎭 Ölçme / Canlandırma' modunda ise diyalogdaki bir kişiyi seçersiniz; karşı rolü bilgisayar seslendirir, "
+                "sıra size geldiğinde mikrofona konuşarak diyaloğu canlı olarak tamamlarsınız.\n\n"
+                "• 📜 Cümle Modu Ekranı: Binlerce anahtar cümleyi sesli okuyup cümle içindeki hangi kelimeleri doğru (yeşil), "
+                "hangilerini hatalı (kırmızı) söylediğinizin analizini görebilirsiniz."
             ),
-            "tip": "💡 İpucu: Canlandırma sırasında zorlanırsanız satırın altındaki '💡 Türkçe İpucu Göster' butonuna basabilirsiniz."
+            "tip": "💡 İpucu: Cümle veya diyalog çalışırken '🙈 Arapçayı Gizle' seçeneğiyle kendinizi sınayabilirsiniz."
         },
         {
-            "badge": "ADIM 5 / 7 — ANAHTAR CÜMLELER VE 'DİNLE & BUL' SINAV MERKEZİ",
-            "icon": "📜  🎧  🏆",
-            "title": "Cümle Analizi ve 10 / 20 / 50 / ♾️ Sınırsız Dinleme Sınavı",
+            "badge": "ADIM 6 / 7 — 🎯 SAĞ PANEL (KOÇ) VE 🎧 DİNLE & BUL SINAV EKRANI",
+            "icon": "🎯  🎧  🏆",
+            "title": "Harf Hatalarınızı Düzeltin ve 4 Şıklı Dinleme Sınavı Çözün",
             "desc": (
-                "• 📜 Cümle Modunda okuduğunuz cümlenin her kelimesi ayrı ayrı değerlendirilir (doğrular yeşil, hatalılar kırmızı).\n\n"
-                "• 🎧 Dinle & Bul Sınav Merkezi'nde Kelime, Sözlük, Cümle veya Diyalog havuzlarından istediğiniz soru sayısında "
-                "4 şıklı sesli anlama sınavı çözebilir, tur sonunda '➕ 10 Soru Daha Devam Et' diyebilirsiniz."
+                "• 🎯 Sağ Panel (Canlı Mahreç & Hareke Koçu): Siz mikrofona konuştuğunuzda birbirine karıştırdığınız harfleri "
+                "(ص-س, ذ-ز, ع-ء, ن-ر vb.) veya eksik uzatmaları kırmızıyla gösterip nasıl düzeltmeniz gerektiğini anlatır.\n\n"
+                "• 🎧 Dinle & Bul Ekranı: Kelime, Sözlük, Cümle veya Diyalog havuzlarından 10, 20, 50 soruluk veya Sınırsız "
+                "4 şıklı sesli dinleme-anlama testi çözebileceğiniz sınav ekranıdır."
             ),
-            "tip": "💡 İpucu: '📅 Günün 15 Tekrarı' (SM-2 algoritması) unutmak üzere olduğunuz kartları otomatik karşınıza çıkarır."
+            "tip": "💡 İpucu: Daha geniş bir çalışma alanı isterseniz üstteki '◧ Paneli Gizle' butonuna basabilirsiniz."
         },
         {
-            "badge": "ADIM 6 / 7 — CANLI MAHREÇ KOÇU VE KIRMIZI HARF VURGUSU",
-            "icon": "🎯  🔤  ⚡",
-            "title": "Harf Mahreçlerinizi ve Uzatma (Med) Hatalarınızı Düzeltin",
+            "badge": "ADIM 7 / 7 — 📊 RAPORLAR, 🖨️ SINAV/DERS NOTU VE 🛠️ YÖNETİM EKRANI",
+            "icon": "📊  🖨️  🛠️",
+            "title": "Gelişim Karnenizi İnceleyin, A4 Sınav/Ders Notu Üretin ve İçerik Ekleyin",
             "desc": (
-                "• Sağ panelin en üstündeki 🎯 CANLI MAHREÇ & HAREKE KOÇU; birbirine yakın harfleri (ص↔س, ط↔ت, ض↔د, ع↔ء, ح↔ه, ن↔ر vb.), "
-                "kök harf değişimlerini ve vezin/med farklarını yakalar.\n\n"
-                "• Hatalı telaffuz edilen kelime kırmızı kutu içinde vurgulanır ve o harfin ağız/boğazdaki doğru çıkış noktası tarif edilir."
+                "• 📊 Raporlar Ekranı: Kazandığınız başarı rozetlerini, paket ilerleme grafiklerinizi ve en çok hata yapılan "
+                "kelimeleri görebileceğiniz, öğretmeninize göndermek için '📦 Ödev & Ses Paketi (.ZIP)' üretebileceğiniz ekrandır.\n\n"
+                "• 🖨️ Sınav & Ders Notu / 🛠️ Yönetim Paneli: Öğretmenlerin A4 yazılı sınav kağıdı veya temiz okuma metni (PDF) "
+                "çıktısı alabileceği; Excel'den kopyala-yapıştır veya dosya yükleme ile yeni içerik ekleyebileceği ekranlardır."
             ),
-            "tip": "💡 İpucu: Aynı kartta üst üste 3 kez zorlanırsanız sistem '🐢 Yavaş Seslendirme (%25)' modunu otomatik açar."
-        },
-        {
-            "badge": "ADIM 7 / 7 — ÖĞRETMEN, DERS NOTU, YAZILI SINAV VE GITHUB GÜNCELLEME",
-            "icon": "🖨️  📋  🔄",
-            "title": "A4 Yazılı Sınav, Ders Notu (Handout), Excel Yapıştırma ve Otomatik Güncelleme",
-            "desc": (
-                "• 🖨️ Sınav & Ders Notu Üretici ile Karma Kaynaklı (Kelime+Diyalog+Cümle) A4 yazılı sınav kağıdı veya "
-                "Yan Yana / Alt Alta / Sonda Toplu çevirili temiz 'Ders Notu / Okuma Metni' PDF çıktısı alabilirsiniz.\n\n"
-                "• 🛠️ Yönetim Panelinde Excel'den doğrudan kopyala-yapıştır yapabilir, klasörden toplu görsel/ses eşleştirebilir "
-                "ve 🔄 GitHub üzerinden tek tıkla otomatik güncelleme alabilirsiniz."
-            ),
-            "tip": "💡 İpucu: Öğrenci bilgisayarlarında Ayarlar'dan 'Ana Ekranda Öğretmen Barını Göster' seçeneğini kapatabilirsiniz."
+            "tip": "💡 Şimdi '🚀 Hemen Başla!' butonuna basarak adınızı kaydedip ilk Arapça pratiğinize başlayabilirsiniz!"
         }
     ]
 
@@ -362,10 +380,10 @@ def open_onboarding_tour(app, force_show: bool = False):
     lbl_title = tk.Label(card, text="", bg=c["BG_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 13, "bold"))
     lbl_title.pack(pady=(0, 8))
 
-    lbl_desc = tk.Label(card, text="", bg=c["BG_COLOR"], fg=c["TEXT_MAIN"], font=("Segoe UI", 10), justify="left", wraplength=660)
+    lbl_desc = tk.Label(card, text="", bg=c["BG_COLOR"], fg=c["TEXT_MAIN"], font=("Segoe UI", 10), justify="left", wraplength=680)
     lbl_desc.pack(anchor="w", pady=(0, 10))
 
-    lbl_tip = tk.Label(card, text="", bg=c["PANEL_COLOR"], fg=YELLOW if is_dark else "#1e3a8a", font=("Segoe UI", 9, "bold"), padx=12, pady=6, wraplength=650, justify="left")
+    lbl_tip = tk.Label(card, text="", bg=c["PANEL_COLOR"], fg=YELLOW if is_dark else "#1e3a8a", font=("Segoe UI", 9, "bold"), padx=12, pady=6, wraplength=670, justify="left")
     lbl_tip.pack(fill="x", side="bottom")
 
     footer = tk.Frame(win, bg=c["CARD_COLOR"], padx=20, pady=8)
@@ -384,6 +402,7 @@ def open_onboarding_tour(app, force_show: bool = False):
         else:
             set_config_val("onboarding_seen_v35", "0")
         win.destroy()
+        app.root.after(150, lambda: open_student_name_dialog(app, force_show=False))
 
     win.protocol("WM_DELETE_WINDOW", finish_tour)
 
@@ -938,9 +957,16 @@ def open_printable_worksheet_generator(parent_win, app, initial_mode: str = "wor
         for rb in handout_radios:
             rb.config(state=rb_state)
 
-        if is_handout and "Sınav" in ent_title.get():
+        default_exam_title = "Arapça Dersi Kelime, Sarf ve Anlama Yazılı Sınavı / Çalışma Yaprağı"
+        default_handout_title = "Arapça Diyalog ve Okuma Metni Ders Notu"
+        cur_t = ent_title.get().strip()
+
+        if is_handout and (cur_t == default_exam_title or "Sınav" in cur_t):
             ent_title.delete(0, tk.END)
-            ent_title.insert(0, "Arapça Diyalog ve Okuma Metni Ders Notu")
+            ent_title.insert(0, default_handout_title)
+        elif not is_handout and (cur_t == default_handout_title or "Ders Notu" in cur_t):
+            ent_title.delete(0, tk.END)
+            ent_title.insert(0, default_exam_title)
 
     chk_activate_handout = tk.Checkbutton(
         handout_box,

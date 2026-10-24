@@ -95,6 +95,31 @@ class App(DialogueModeMixin):
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title(f"Arapça Telaffuz ve Konuşma Asistanı v{APP_VERSION} — Muallimun.Net")
+        # Windows Görev Çubuğu ve Pencere İkonu Bağlantısı
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("muallimun.arapca_asistani.v40")
+        except Exception:
+            pass
+
+        # Hem pencere başlığı (iconbitmap) hem Windows görev çubuğu (iconphoto) bağlantısı
+        ico_path = os.path.join(BASE_DIR, "ui", "app_icon.ico")
+        png_path = os.path.join(BASE_DIR, "ui", "app_icon.png")
+
+        if os.path.exists(ico_path):
+            try:
+                self.root.iconbitmap(ico_path)
+            except Exception:
+                pass
+
+        if os.path.exists(png_path):
+            try:
+                # Windows 10/11 görev çubuğu iconphoto ile verilen PNG'yi doğrudan ve pürüzsüz yakalar
+                icon_img = ImageTk.PhotoImage(file=png_path)
+                self.root.iconphoto(True, icon_img)
+                self._app_taskbar_icon_ref = icon_img  # Garbage collector'dan korumak için referans tutulur
+            except Exception:
+                pass
 
         screen_w = root.winfo_screenwidth()
         screen_h = root.winfo_screenheight()
@@ -225,7 +250,6 @@ class App(DialogueModeMixin):
             self.sent_rec_status.config(text="Whisper devre dışı", fg=RED)
 
         self.root.after(600, lambda: open_onboarding_tour(self, force_show=False))
-        self.root.after(800, lambda: open_student_name_dialog(self, force_show=False))
         self.root.after(2500, self._check_updates_in_background)
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
@@ -2933,6 +2957,14 @@ class App(DialogueModeMixin):
 
 if __name__ == "__main__":
     try:
+        # Windows Görev Çubuğuna özel uygulama kimliğini pencere açılmadan önce bildiriyoruz
+        try:
+            import ctypes
+            myappid = "muallimun.arapca_asistani.v40"
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except Exception:
+            pass
+
         root = tk.Tk()
         app = App(root)
         root.lift()
