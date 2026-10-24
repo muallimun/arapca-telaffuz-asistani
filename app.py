@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Arapça Telaffuz ve Konuşma Asistanı — Premium v39 (Muallimun.Net Tam Sürüm)
-- 🏛️ Sadeleştirilmiş 2x2 Öğrenci Odaklı Ana Giriş Ekranı + Alt Öğretmen Araçları Şeridi
-- ☀️/🌙 & 📖 Üst Barda İkonlu Kompakt Butonlar ve Öğrenci Dostu Terim İpuçları (Tooltip)
-- 📂 Sağ Panelde Başlığı Kendi İçeriğinin Üstünde Açılan Doğal Akordiyon Menüler
-- 🎙️ Kayıt Sırasında Yeşil Parlayan Kart Çerçevesi (Mic Glow) ve Büyütülmüş Arapça Hat (44pt)
-- 🎯 Mahreç Koçunda Hatalı Harfin Kırmızıyla Vurgulanması ve Tam Kontrastlı Açık/Koyu Tema
+Arapça Telaffuz ve Konuşma Asistanı — Premium v40 Gold Master (Muallimun.Net Tam Sürüm)
+Repo: https://github.com/muallimun/arapca-telaffuz-asistani
+- 🔄 GitHub Üzerinden Arka Planda Otomatik Sürüm Kontrolü ve Tek Tıkla Güncelleme
+- 🪟 Tekil Harici Pencere Yöneticisi (Yeni Pencere Açılınca Öncekini Otomatik Kapatma)
+- 📐 Ekran Sınırını Algılayan Akıllı Tooltip (Sağ Panelde Ekran Dışına Taşmama Garantisi)
+- 🏛️ 2x2 Öğrenci Odaklı Ana Giriş Ekranı + Gizlenebilir Öğretmen & Ölçme Araçları Barı
+- 📂 Doğal Konumlu Akordiyon Menüler, Yeşil Mikrofon Çerçeve Parlaması ve Kırmızı Harf Vurgusu
 """
 
 import os
@@ -37,6 +38,7 @@ from PIL import Image, ImageTk
 import pygame
 
 from core.config import (
+    APP_VERSION, GITHUB_REPO_URL,
     BASE_DIR, ASSETS_DIR, RECORDINGS_DIR, BEEP_PATH,
     WHISPER_MODEL_NAME, SAMPLERATE, AR_FONT_FAMILY, ANALYSIS_FONT_FAMILY,
     BG_COLOR, CARD_COLOR, PANEL_COLOR, ACCENT, GREEN, RED, BLUE, YELLOW, PURPLE,
@@ -62,10 +64,11 @@ from core.audio_engine import (
     ensure_mixer_initialized, play_beep_nonblocking,
     play_effect_nonblocking, stop_all_audio_channels
 )
+from core.updater import check_for_updates_async, open_updater_window
 from ui.admin_panel import open_unified_admin_panel
 from ui.dialogue_mode import DialogueModeMixin
 from ui.dialogs import (
-    ConfettiParticle, open_user_guide_window, open_settings_window,
+    ConfettiParticle, open_student_name_dialog, open_user_guide_window, open_settings_window,
     open_quick_edit_word, open_quick_edit_sentence,
     open_analytics_and_reports_window,
     open_shadowing_trainer_window, open_listening_warmup_window,
@@ -91,7 +94,7 @@ _TERM_TOOLTIPS = {
 class App(DialogueModeMixin):
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("Arapça Telaffuz ve Konuşma Asistanı — Muallimun.Net")
+        self.root.title(f"Arapça Telaffuz ve Konuşma Asistanı v{APP_VERSION} — Muallimun.Net")
 
         screen_w = root.winfo_screenwidth()
         screen_h = root.winfo_screenheight()
@@ -101,6 +104,8 @@ class App(DialogueModeMixin):
         self.root.minsize(1100, 720)
         self._closing = False
         self._tooltip_win = None
+        self._active_dialog_win = None
+        self._latest_update_info = None
 
         generate_beep()
         ensure_mixer_initialized()
@@ -117,6 +122,8 @@ class App(DialogueModeMixin):
         self.right_panel_visible = True
         self.quick_settings_open = (get_config_val("quick_settings_open", "0") == "1")
         self.stats_accordion_open = (get_config_val("stats_accordion_open", "0") == "1")
+        self.show_teacher_bar_var = tk.BooleanVar(value=(get_config_val("show_teacher_bar", "1") != "0"))
+        self.student_name_var = tk.StringVar(value=get_config_val("student_name", "") or "")
         self.recent_attempt_history = []  # [(item_id_str, is_correct_bool), ...]
         self._active_morph_ar = None
         self._active_morph_label = ""
@@ -146,7 +153,6 @@ class App(DialogueModeMixin):
         self.card_word_lvl_var = tk.StringVar(value="A1")
         self.card_sent_lvl_var = tk.StringVar(value="A1")
 
-        # Görsele göre Arapça hattın daha vurgulu durması için varsayılan punto 44pt yapıldı
         self.word_ar_size = 44
         self.word_tr_size = 18
 
@@ -219,12 +225,71 @@ class App(DialogueModeMixin):
             self.sent_rec_status.config(text="Whisper devre dışı", fg=RED)
 
         self.root.after(600, lambda: open_onboarding_tour(self, force_show=False))
+        self.root.after(800, lambda: open_student_name_dialog(self, force_show=False))
+        self.root.after(2500, self._check_updates_in_background)
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
     # =========================================================================
-    # 💡 ÖĞRENCİ DOSTU AÇIKLAMA BALONCUĞU (TOOLTIP) YARDIMCISI
+    # 🪟 TEKİL HARİCİ PENCERE YÖNETİCİSİ (ÖNCEKİ AÇIK PENCEREYİ OTOMATİK KAPATIR)
+    # =========================================================================
+    def _close_active_singleton_dialog(self):
+        """Açık olan harici modül penceresi varsa güvenli şekilde kapatır."""
+        if self._active_dialog_win is not None:
+            try:
+                if self._active_dialog_win.winfo_exists():
+                    try:
+                        self._active_dialog_win.grab_release()
+                    except Exception:
+                        pass
+                    self._active_dialog_win.destroy()
+            except Exception:
+                pass
+            self._active_dialog_win = None
+
+    def _register_singleton_dialog(self, new_win: tk.Toplevel):
+        """Yeni bir harici pencere açıldığında önceki açık pencereyi otomatik kapatır."""
+        if self._active_dialog_win is not None and self._active_dialog_win != new_win:
+            self._close_active_singleton_dialog()
+        self._active_dialog_win = new_win
+
+    def _open_updater_dialog(self):
+        self._close_active_singleton_dialog()
+        open_updater_window(self, self._latest_update_info)
+
+    def _check_updates_in_background(self):
+        """Uygulama açılışında GitHub deposunu arka planda sessizce kontrol eder."""
+        def _on_checked(res: dict):
+            if self._closing:
+                return
+            self._latest_update_info = res
+            if res.get("ok") and res.get("has_update"):
+                rem_v = res.get("remote_version", "")
+                self._safe_ui(lambda: (
+                    self.btn_update.config(
+                        text=f"🔄 v{rem_v} Güncelle!",
+                        bg=GREEN, fg="#0f172a", width=0, padx=10
+                    ),
+                    self._show_toast(f"🎉 Yeni sürüm (v{rem_v}) GitHub'da yayınlandı! Üst çubuktan güncelleyebilirsiniz.", GREEN, 4200)
+                ))
+
+        check_for_updates_async(_on_checked)
+
+    def _on_toggle_teacher_bar(self):
+        """Ayarlardan 'Öğretmen & Ölçme Araçları Barını Göster' değiştirildiğinde kaydeder ve Ana Sayfayı yeniler."""
+        val = "1" if self.show_teacher_bar_var.get() else "0"
+        set_config_val("show_teacher_bar", val)
+        if self.current_mode == "home":
+            self._render_home_dashboard()
+
+    # =========================================================================
+    # 💡 EKRAN SINIRINI ALGILAYAN AKILLI AÇIKLAMA BALONCUĞU (TOOLTIP)
     # =========================================================================
     def _attach_tooltip(self, widget: tk.Widget, text_or_fn):
+        """
+        Fareyle üzerine gelindiğinde açıklama baloncuğu gösterir.
+        Sağ panel gibi ekranın sağ kenarına yakın bileşenlerde balonun ekran dışına taşmasını
+        önlemek için kutu genişliğini hesaplar ve gerekirse imlecin soluna açar.
+        """
         def _show(event):
             self._hide_tooltip()
             msg = text_or_fn() if callable(text_or_fn) else str(text_or_fn)
@@ -232,15 +297,30 @@ class App(DialogueModeMixin):
                 return
             tw = tk.Toplevel(self.root)
             tw.wm_overrideredirect(True)
-            x = event.x_root + 12
-            y = event.y_root + 16
-            tw.wm_geometry(f"+{x}+{y}")
             lbl = tk.Label(
                 tw, text=msg, bg="#0f172a", fg="#ffd369",
                 font=("Segoe UI", 9, "bold"), padx=10, pady=5,
-                relief="solid", bd=1, wraplength=320, justify="left"
+                relief="solid", bd=1, wraplength=300, justify="left"
             )
             lbl.pack()
+            tw.update_idletasks()
+
+            req_w = tw.winfo_reqwidth()
+            req_h = tw.winfo_reqheight()
+            screen_w = self.root.winfo_screenwidth()
+            screen_h = self.root.winfo_screenheight()
+
+            x = event.x_root + 12
+            y = event.y_root + 16
+
+            # Sağ kenardan taşmayı önle: Ekran sınırını aşıyorsa imlecin sol tarafına hizala
+            if x + req_w > screen_w - 16:
+                x = max(10, event.x_root - req_w - 12)
+            # Alt kenardan taşmayı önle
+            if y + req_h > screen_h - 40:
+                y = max(10, event.y_root - req_h - 10)
+
+            tw.wm_geometry(f"+{x}+{y}")
             self._tooltip_win = tw
 
         def _hide(event=None):
@@ -306,7 +386,6 @@ class App(DialogueModeMixin):
             self.sent_inline_coach_lbl.place_forget()
 
     def _restore_accordion_states(self):
-        """Sağ paneldeki akordiyonların her birini kendi başlığının hemen altında açar."""
         if self.quick_settings_open:
             self.btn_acc_quick.config(text="▼ ⚡ HIZLI AYARLAR (Kapat)")
             self.quick_settings_body.pack(side="top", fill="x", padx=6, pady=(3, 4))
@@ -335,7 +414,6 @@ class App(DialogueModeMixin):
             self.stats_accordion_body.pack_forget()
 
     def _set_recording_glow(self, active: bool):
-        """Mikrofon kaydı sırasında kart çerçevesini parlak yeşil (3px) yaparak öğrenciye görsel sinyal verir."""
         border_col = GREEN if active else self.colors["BORDER"]
         bw = 3 if active else 1
         if hasattr(self, "card") and self.card.winfo_exists():
@@ -352,7 +430,7 @@ class App(DialogueModeMixin):
         lbl_p.pack(side="right", padx=3)
         btn_minus = tk.Button(p_frame, text="A-", command=lambda: on_delta_cb(-2), bg=PANEL_COLOR, fg="white", font=FONT_UI_B, relief="flat", width=3, cursor="hand2")
         btn_minus.pack(side="right", padx=1)
-        self._punto_widgets.append((p_frame, lbl_p, b_minus := btn_minus, b_plus := btn_plus))
+        self._punto_widgets.append((p_frame, lbl_p, btn_minus, btn_plus))
 
     def _stop_all_audio(self, include_effects: bool = False):
         self._audio_session_id += 1
@@ -406,7 +484,7 @@ class App(DialogueModeMixin):
             b_min.configure(bg=btn_sec, fg=txt)
             b_pls.configure(bg=btn_sec, fg=txt)
 
-        # Kelime Kartı ve Navigasyon Butonları (Açık/Koyu Tema Kontrast Garantili)
+        # Kelime Kartı
         self.card.configure(bg=card, highlightbackground=border)
         self.canvas.configure(bg=card)
         self.word_meta_bar.configure(bg=card)
@@ -439,7 +517,7 @@ class App(DialogueModeMixin):
         self.chat_canvas.configure(bg=c["CHAT_BG"])
         self.chat_frame.configure(bg=c["CHAT_BG"])
 
-        # Cümle Kartı ve Navigasyon Butonları
+        # Cümle Kartı
         self.sentence_card.configure(bg=card, highlightbackground=border)
         self.sent_canvas.configure(bg=card)
         self.sent_top_controls.configure(bg=card)
@@ -458,7 +536,7 @@ class App(DialogueModeMixin):
         self.sent_inline_coach_lbl.configure(bg=panel, fg=head_col)
         self.sent_counter_label.configure(bg=bg, fg=dim)
 
-        # Sağ Panel ve Doğal Akordiyon Çerçeveleri
+        # Sağ Panel
         self.right_frame.configure(bg=panel, highlightbackground=border)
         self.top_btn_frame_r.configure(bg=panel)
         self.btn_all_settings.configure(bg=btn_sec, fg=txt)
@@ -496,8 +574,9 @@ class App(DialogueModeMixin):
         if self.lbl_logo_footer:
             self.lbl_logo_footer.configure(bg=panel)
 
-        # Üst Bar İkonlu Kompakt Tema ve Kılavuz Butonları
         self.btn_guide.configure(bg=btn_sec, fg=head_col)
+        if not (self._latest_update_info and self._latest_update_info.get("has_update")):
+            self.btn_update.configure(bg=btn_sec, fg=head_col)
         self.btn_toggle_panel.configure(bg=btn_sec, fg=txt)
         self.btn_theme.config(
             text="☀️" if self.theme_mode == "dark" else "🌙",
@@ -681,15 +760,23 @@ class App(DialogueModeMixin):
         self.btn_toggle_panel.pack(side="right", padx=3)
         self._attach_tooltip(self.btn_toggle_panel, "Odaklanma modu için sağ paneli gizler veya tekrar açar.")
 
-        # İkonlu Kompakt Kılavuz Butonu (Sadece İkon + Tooltip)
+        # İkonlu Kompakt GitHub Güncelleme Butonu
+        self.btn_update = tk.Button(
+            self.top_bar, text="🔄", command=self._open_updater_dialog,
+            bg="#233554", fg=YELLOW, font=("Segoe UI", 11, "bold"), relief="flat", width=3, pady=3, cursor="hand2"
+        )
+        self.btn_update.pack(side="right", padx=3)
+        self._attach_tooltip(self.btn_update, f"🔄 Otomatik Güncelleme ve Sürüm Merkezi (Kurulu: v{APP_VERSION})")
+
+        # İkonlu Kompakt Kılavuz Butonu
         self.btn_guide = tk.Button(
             self.top_bar, text="📖", command=lambda: open_user_guide_window(self),
             bg="#233554", fg=YELLOW, font=("Segoe UI", 12, "bold"), relief="flat", width=3, pady=3, cursor="hand2"
         )
         self.btn_guide.pack(side="right", padx=3)
-        self._attach_tooltip(self.btn_guide, "📖 Kullanım Kılavuzu ve Başlangıç Turu (Kısayol: F1)")
+        self._attach_tooltip(self.btn_guide, "📖 Kullanım Kılavuzu ve 7 Adımlı Başlangıç Turu (Kısayol: F1)")
 
-        # İkonlu Kompakt Tema Butonu (Sadece İkon + Tooltip)
+        # İkonlu Kompakt Tema Butonu
         self.btn_theme = tk.Button(
             self.top_bar, text="☀️", command=self._toggle_theme,
             bg="#233554", fg=YELLOW, font=("Segoe UI", 12, "bold"), relief="flat", width=3, pady=3, cursor="hand2"
@@ -703,7 +790,6 @@ class App(DialogueModeMixin):
         self.main_frame = tk.Frame(self.root, bg=BG_COLOR)
         self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Önce right_frame (sabit 310px), sonra left_frame (pack_propagate=False) paketlenir
         self.right_frame = tk.Frame(self.main_frame, bg=PANEL_COLOR, width=310, bd=0, highlightthickness=1, highlightbackground="#233554")
         self.right_frame.pack(side="right", fill="y", padx=(10, 0))
         self.right_frame.pack_propagate(False)
@@ -787,7 +873,6 @@ class App(DialogueModeMixin):
         self.toast_label = tk.Label(self.root, text="", bg=YELLOW, fg=BG_COLOR, font=("Segoe UI", 11, "bold"), padx=14, pady=6)
         self.prompt_label = tk.Label(self.canvas, text="", bg=CARD_COLOR, fg=GREEN, font=FONT_PROMPT)
 
-        # Görsel veya Sarf Kök Rozeti + Türev Ağacı Alanı
         self.image_label = tk.Label(self.canvas, bg=CARD_COLOR)
         self.image_label.place(relx=0.5, rely=0.21, anchor="center")
 
@@ -822,7 +907,6 @@ class App(DialogueModeMixin):
         self.attempt_label.pack(side="left", padx=10)
         self.btn_pass = tk.Button(self.info_frame_w, text="⏭️ Pas Geç", command=self._pass_word, bg=ACCENT, fg="white", font=FONT_UI_B, relief="flat", padx=10, pady=2, cursor="hand2", bd=0)
 
-        # Çakışmasız Bütüncül Sonuç & Durum Bloğu
         self.result_frame = tk.Frame(self.canvas, bg=CARD_COLOR)
         self.result_frame.place(relx=0.5, rely=0.88, anchor="center")
 
@@ -1106,7 +1190,6 @@ class App(DialogueModeMixin):
         )
         self.btn_all_settings.pack(fill="x", padx=10, pady=2)
 
-        # Günlük Seri (Streak) & Paket Tamamlama Kartı
         self.streak_box = tk.Frame(self.right_frame, bg=CARD_COLOR, padx=8, pady=6, highlightthickness=1, highlightbackground="#233554", cursor="hand2")
         self.streak_box.pack(fill="x", padx=10, pady=(4, 2))
         self.streak_box.bind("<Button-1>", lambda e: open_analytics_and_reports_window(self))
@@ -1123,7 +1206,6 @@ class App(DialogueModeMixin):
         sep1.pack(fill="x", padx=10, pady=4)
         self.right_separators.append(sep1)
 
-        # Sağ Panel En Alt: Muallimun.Net Tıklanabilir Footer
         self.brand_footer_frame = tk.Frame(self.right_frame, bg=PANEL_COLOR, pady=5, cursor="hand2")
         self.brand_footer_frame.pack(side="bottom", fill="x", padx=10, pady=(2, 5))
         self.brand_footer_frame.bind("<Button-1>", self._open_brand_website)
@@ -1142,7 +1224,7 @@ class App(DialogueModeMixin):
         self.lbl_brand_footer.pack(side="left")
         self.lbl_brand_footer.bind("<Button-1>", self._open_brand_website)
 
-        # DOĞAL AKORDİYON 2 (Kendi Çerçevesinde: Başlık Üstte, İçerik Hemen Altında Açılır)
+        # DOĞAL AKORDİYON 2 (Başlık Üstte, İçerik Hemen Altında Açılır)
         self.acc_stats_wrapper = tk.Frame(self.right_frame, bg=PANEL_COLOR, highlightthickness=1, highlightbackground="#233554")
         self.acc_stats_wrapper.pack(side="bottom", fill="x", padx=10, pady=(2, 4))
 
@@ -1175,7 +1257,7 @@ class App(DialogueModeMixin):
         self.btn_clean_recs.pack(fill="x", pady=(4, 2))
         self._update_recordings_btn_label()
 
-        # DOĞAL AKORDİYON 1 (Kendi Çerçevesinde: Başlık Üstte, İçerik Hemen Altında Açılır)
+        # DOĞAL AKORDİYON 1 (Başlık Üstte, İçerik Hemen Altında Açılır)
         self.acc_quick_wrapper = tk.Frame(self.right_frame, bg=PANEL_COLOR, highlightthickness=1, highlightbackground="#233554")
         self.acc_quick_wrapper.pack(side="bottom", fill="x", padx=10, pady=(4, 2))
 
@@ -1208,7 +1290,7 @@ class App(DialogueModeMixin):
         self.lbl_voice_pref.pack(side="left")
         ttk.Combobox(self.voice_row, textvariable=self.voice_pref_var, values=["Sırayla", "Kadın", "Erkek"], state="readonly", width=10, font=("Segoe UI", 9)).pack(side="left", padx=6)
 
-        # ANA MERKEZ BLOĞU (ÜSTTE VE GENİŞ): 🎯 MAHREÇ & HAREKE KOÇU
+        # ANA MERKEZ BLOĞU: 🎯 MAHREÇ & HAREKE KOÇU
         self.coach_header_row = tk.Frame(self.right_frame, bg=PANEL_COLOR)
         self.coach_header_row.pack(fill="x", padx=10, pady=(2, 3))
         self.lbl_analysis_title = tk.Label(
@@ -1229,7 +1311,7 @@ class App(DialogueModeMixin):
         self.char_analysis_text.pack(padx=10, pady=(0, 6), fill="both", expand=True)
 
     # =========================================================================
-    # 🏛️ SADELEŞTİRİLMİŞ 2x2 ÖĞRENCİ ODAKLI ANA GİRİŞ EKRANI + ALT ÖĞRETMEN BARI
+    # 🏛️ SADELEŞTİRİLMİŞ 2x2 ÖĞRENCİ ODAKLI ANA GİRİŞ EKRANI + GİZLENEBİLİR ÖĞRETMEN BARI
     # =========================================================================
     def _resume_last_session(self):
         last_m = get_config_val("last_active_mode", "words")
@@ -1266,9 +1348,10 @@ class App(DialogueModeMixin):
             wraplength=560, justify="right"
         ).pack(anchor="w")
 
+        std_name = (self.student_name_var.get() or get_config_val("student_name", "") or "Öğrenci").strip()
         tk.Label(
             hero_left,
-            text="Bugün hangi modda Arapça konuşma pratiği yapmak istersiniz?",
+            text=f"👋 Hoş geldin {std_name}! Bugün hangi modda Arapça konuşma pratiği yapmak istersin?",
             bg=c["PANEL_COLOR"], fg=c["TEXT_MAIN"], font=("Segoe UI", 11, "bold"),
             wraplength=560, justify="left"
         ).pack(anchor="w", pady=(2, 0))
@@ -1276,10 +1359,14 @@ class App(DialogueModeMixin):
         hero_right = tk.Frame(hero, bg=c["CARD_COLOR"], padx=14, pady=8, highlightthickness=1, highlightbackground=c["BORDER"])
         hero_right.pack(side="right")
 
-        tk.Label(
-            hero_right, text=badge_info["level_title"],
-            bg=c["CARD_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 11, "bold")
-        ).pack(anchor="e")
+        name_badge_btn = tk.Button(
+            hero_right, text=f"👤 {std_name} ✏️   |   {badge_info['level_title']}",
+            command=lambda: open_student_name_dialog(self, force_show=True),
+            bg=c["CARD_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 10, "bold"),
+            relief="flat", bd=0, cursor="hand2", anchor="e"
+        )
+        name_badge_btn.pack(anchor="e")
+        self._attach_tooltip(name_badge_btn, "Kullanıcı / Öğrenci adını değiştirmek için tıklayın.")
         tk.Label(
             hero_right,
             text=f"🔥 Seri: {badge_info['streak']} Gün  |  🎯 Bugün: {badge_info['daily_count']}/{badge_info['daily_goal']}  |  ⭐ Puan: {badge_info['total_points']}",
@@ -1443,39 +1530,40 @@ class App(DialogueModeMixin):
                 relief="flat", pady=5, cursor="hand2"
             ).pack(fill="x")
 
-        # 4. Alt Şerit: 👨‍🏫 Öğretmen, Yazılı Sınav ve Rapor Araçları + Klavye Kısayolları
-        teacher_bar = tk.Frame(
-            self.home_container, bg=c["PANEL_COLOR"], padx=16, pady=7,
-            highlightthickness=1, highlightbackground=c["BORDER"]
-        )
-        teacher_bar.pack(fill="x", pady=(6, 0))
+        # 4. Alt Şerit: 👨‍🏫 Öğretmen, Yazılı Sınav, Ders Notu ve Rapor Araçları (Ayarlardan Gizlenebilir)
+        if self.show_teacher_bar_var.get():
+            teacher_bar = tk.Frame(
+                self.home_container, bg=c["PANEL_COLOR"], padx=16, pady=7,
+                highlightthickness=1, highlightbackground=c["BORDER"]
+            )
+            teacher_bar.pack(fill="x", pady=(6, 0))
 
-        tk.Label(
-            teacher_bar,
-            text="👨‍🏫 Öğretmen & Ölçme Araçları  (⌨️ Kısayollar: [Boşluk] Kayıt • [Sağ/Sol Ok] Kart Değiştir • [F1] Kılavuz):",
-            bg=c["PANEL_COLOR"], fg=c["TEXT_DIM"], font=("Segoe UI", 9, "bold")
-        ).pack(side="left")
+            tk.Label(
+                teacher_bar,
+                text="👨‍🏫 Öğretmen, Yazılı Sınav, Ders Notu & Yönetim Araçları:",
+                bg=c["PANEL_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 9, "bold")
+            ).pack(side="left")
 
-        tk.Button(
-            teacher_bar, text="🛠️ Yönetim & Paket Paneli",
-            command=lambda: open_unified_admin_panel(self, "words"),
-            bg=c["BTN_SEC"], fg=c["TEXT_MAIN"], font=("Segoe UI", 9, "bold"),
-            relief="flat", padx=10, pady=3, cursor="hand2"
-        ).pack(side="right", padx=(4, 0))
+            tk.Button(
+                teacher_bar, text="🛠️ Yönetim & Paket Paneli",
+                command=lambda: open_unified_admin_panel(self, "words"),
+                bg=c["BTN_SEC"], fg=c["TEXT_MAIN"], font=("Segoe UI", 9, "bold"),
+                relief="flat", padx=10, pady=3, cursor="hand2"
+            ).pack(side="right", padx=(4, 0))
 
-        tk.Button(
-            teacher_bar, text="📊 Gelişim Karnesi & Rozetler",
-            command=lambda: open_analytics_and_reports_window(self),
-            bg=PURPLE, fg="white", font=("Segoe UI", 9, "bold"),
-            relief="flat", padx=10, pady=3, cursor="hand2"
-        ).pack(side="right", padx=4)
+            tk.Button(
+                teacher_bar, text="📊 Gelişim Karnesi & Rozetler",
+                command=lambda: open_analytics_and_reports_window(self),
+                bg=PURPLE, fg="white", font=("Segoe UI", 9, "bold"),
+                relief="flat", padx=10, pady=3, cursor="hand2"
+            ).pack(side="right", padx=4)
 
-        tk.Button(
-            teacher_bar, text="🖨️ A4 Yazılı Sınav & Çalışma Kağıdı Üret",
-            command=lambda: open_printable_worksheet_generator(self.root, self, "words"),
-            bg=YELLOW, fg="#0f172a", font=("Segoe UI", 9, "bold"),
-            relief="flat", padx=12, pady=3, cursor="hand2"
-        ).pack(side="right", padx=4)
+            tk.Button(
+                teacher_bar, text="🖨️ A4 Yazılı Sınav & Ders Notu (Handout) Üret",
+                command=lambda: open_printable_worksheet_generator(self.root, self, "words"),
+                bg=YELLOW, fg="#0f172a", font=("Segoe UI", 9, "bold"),
+                relief="flat", padx=12, pady=3, cursor="hand2"
+            ).pack(side="right", padx=4)
 
     # =========================================================================
     # 🌿 SARF SÖZLÜĞÜ: ALTIGEN KÖK ROZETİ + TOOLTIP DESTEKLİ TÜREV AĞACI
@@ -1689,6 +1777,7 @@ class App(DialogueModeMixin):
                 self._refresh_chat()
 
     def _switch_mode(self, mode):
+        self._close_active_singleton_dialog()
         self._stop_all_audio(include_effects=True)
         if self.roleplay_active:
             self._stop_roleplay_session()
@@ -2125,7 +2214,6 @@ class App(DialogueModeMixin):
         if img_full:
             try:
                 img = Image.open(img_full)
-                # Görsel biraz küçültülerek Arapça kelimenin (44pt) çok daha vurgulu durması sağlandı
                 img.thumbnail((215, 145), Image.LANCZOS)
                 self.current_photo = ImageTk.PhotoImage(img)
                 self.image_label.config(image=self.current_photo, text="")
@@ -2726,11 +2814,6 @@ class App(DialogueModeMixin):
         play_effect_nonblocking(path)
 
     def _update_char_analysis(self, expected: str, heard: str, makhraj_tips: list = None, is_correct: bool = False):
-        """
-        Sağ paneldeki Mahreç & Hareke Koçu kutusunu günceller.
-        Hatalı telaffuz edilen harf tespit edildiğinde (örn. ن ➔ ر), beklenen kelime içindeki
-        o harfi kırmızıyla vurgulayarak öğrenciye görsel harf geri bildirimi verir.
-        """
         ok_col = "#047857" if self.theme_mode == "light" else GREEN
         coach_col = "#b45309" if self.theme_mode == "light" else YELLOW
 
@@ -2835,6 +2918,7 @@ class App(DialogueModeMixin):
     def _on_close(self):
         self._closing = True
         self._hide_tooltip()
+        self._close_active_singleton_dialog()
         self.roleplay_active = False
         self._stop_all_audio(include_effects=True)
         if self.recording:

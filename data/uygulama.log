@@ -1,0 +1,10 @@
+2026-10-24 11:51:47,296 [ERROR] config: TTS ses çalma hatası (E:\python_denemeleri\arapca_telaffuz_prog\assets\tts_cache\8c14a523203d96ad50e1402515b81df9.mp3) -> No such file or directory: 'E:\python_denemeleri\arapca_telaffuz_prog\assets\tts_cache\8c14a523203d96ad50e1402515b81df9.mp3'.
+Traceback (most recent call last):
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 1509, in worker
+    pygame.mixer.music.load(audio_path)
+FileNotFoundError: No such file or directory: 'E:\python_denemeleri\arapca_telaffuz_prog\assets\tts_cache\8c14a523203d96ad50e1402515b81df9.mp3'.
+2026-10-24 11:51:47,686 [ERROR] config: TTS ses çalma hatası (E:\python_denemeleri\arapca_telaffuz_prog\assets\tts_cache\1ba065895fbe340427cf565117cfc06e.mp3) -> No such file or directory: 'E:\python_denemeleri\arapca_telaffuz_prog\assets\tts_cache\1ba065895fbe340427cf565117cfc06e.mp3'.
+Traceback (most recent call last):
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 1509, in worker
+    pygame.mixer.music.load(audio_path)
+FileNotFoundError: No such file or directory: 'E:\python_denemeleri\arapca_telaffuz_prog\assets\tts_cache\1ba065895fbe340427cf565117cfc06e.mp3'.
