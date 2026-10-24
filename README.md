@@ -1,12 +1,36 @@
 # 🎙️ Arapça Telaffuz ve Konuşma Asistanı — Muallimun.Net (v40.0)
 
-[![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v40.0%20Gold%20Master-10b981?style=for-the-badge)](https://github.com/muallimun/arapca-telaffuz-asistani/releases)
+[![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v40.0%20Gold%20Master-10b981?style=for-the-badge)](https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest)
+[![Windows Setup İndir](https://img.shields.io/badge/%F0%9F%93%A5%20Kurulum%20%C4%B0ndir-Setup.exe-00e676?style=for-the-badge)](https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe)
+[![YouTube Tanıtım Videosu](https://img.shields.io/badge/%E2%96%B6%EF%B8%8F%20YouTube-Tan%C4%B1t%C4%B1m%20Videosu-ef4444?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/ZNEpJisBbEg)
+[![Tanıtım ve Kılavuz](https://img.shields.io/badge/%F0%9F%8C%90%20Web%20K%C4%B1lavuz-arapca.muallimun.net-ffd369?style=for-the-badge)](https://arapca.muallimun.net/arapca-telaffuz-asistani/)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3b82f6?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Lisans](https://img.shields.io/badge/Lisans-MIT-eab308?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011%20%26%20Ak%C4%B1ll%C4%B1%20Tahta-8b5cf6?style=for-the-badge)](https://github.com/muallimun/arapca-telaffuz-asistani)
-[![Web](https://img.shields.io/badge/Web-Muallimun.Net-ffd369?style=for-the-badge)](https://www.muallimun.com)
 
 **Arapça Telaffuz ve Konuşma Asistanı**, İmam Hatip Liseleri, İlahiyat Fakülteleri, TÖMER ve bireysel Arapça öğrenenlerin en büyük ihtiyacı olan **doğru telaffuz (النطق الصحيح)**, **sarf / sülâsî kök-türev farkındalığı (الصرف والاشتقاق)**, **cümle akıcılığı** ve **karşılıklı konuşma (المحادثة والتكلم)** becerilerini geliştirmek amacıyla **Muallimun.Net** tarafından geliştirilmiş yapay zekâ destekli interaktif bir dil laboratuvarıdır.
+
+---
+
+## 🎬 Sesli ve Görüntülü Tanıtım Videosu & Hızlı Erişim Bağlantıları
+
+Uygulamanın tüm modüllerini, yapay zekâ destekli mahreç koçunu, sarf sözlüğünü, yazılı sınav üreticisini ve içerik ekleme adımlarını **7 dakika 50 saniyelik** kapsamlı tanıtım videomuzdan izleyebilirsiniz:
+
+<div align="center">
+  <a href="https://youtu.be/ZNEpJisBbEg" target="_blank">
+    <img src="https://img.youtube.com/vi/ZNEpJisBbEg/maxresdefault.jpg" alt="Arapça Telaffuz ve Konuşma Asistanı v40.0 Tanıtım Videosu" width="760" style="border-radius:12px;border:2px solid #ffd369;"/>
+  </a>
+  <p>
+    ▶️ <b><a href="https://youtu.be/ZNEpJisBbEg">YouTube Tanıtım ve Kullanım Rehberini İzlemek İçin Tıklayın (https://youtu.be/ZNEpJisBbEg)</a></b>
+  </p>
+</div>
+
+| Hızlı Erişim | Bağlantı Adresi |
+| :--- | :--- |
+| 📥 **Windows Kurulum Paketi (`Setup.exe`)** | **[Arapca_Telaffuz_Asistani_Setup.exe İndir](https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe)** |
+| 🌐 **Web Tanıtım Sayfası & 31 Ekran Galerisi** | **[https://arapca.muallimun.net/arapca-telaffuz-asistani/](https://arapca.muallimun.net/arapca-telaffuz-asistani/)** |
+| 📕 **Resimli PDF Kullanım Kılavuzu (A4)** | **[Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf](https://arapca.muallimun.net/arapca-telaffuz-asistani/Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf)** |
+| 🎬 **YouTube Tanıtım Videosu (07:50 dk)** | **[https://youtu.be/ZNEpJisBbEg](https://youtu.be/ZNEpJisBbEg)** |
+| 🕌 **Geliştirici & Eğitim Portalı** | **[https://www.muallimun.com](https://www.muallimun.com)** |
 
 ---
 
@@ -65,12 +89,16 @@
 
 ## 🚀 Kurulum ve Çalıştırma
 
-### 1. Gereksinimler
+### Seçenek A: Tek Tıkla Windows Kurulum Sihirbazı (`Setup.exe` — Önerilen)
+Herhangi bir Python veya ek kütüphane kurulumuna ihtiyaç duymadan doğrudan kurulum sihirbazıyla kurmak için:
+1. **[Arapca_Telaffuz_Asistani_Setup.exe](https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe)** bağlantısına tıklayarak en güncel kurulum dosyasını indirin.
+2. Kurulum sihirbazını çalıştırıp yönergeleri takip edin.
+3. Masaüstünde oluşan **Arapça Telaffuz Asistanı** kısayoluna tıklayarak uygulamayı başlatın.
+
+### Seçenek B: Kaynak Koddan Kurulum (Geliştiriciler İçin — PowerShell)
 * **İşletim Sistemi:** Windows 10 veya Windows 11 (64-bit)
 * **Python:** Python 3.10, 3.11 veya 3.12
 * **Donanım:** Sesli telaffuz değerlendirmesi için mikrofon ve hoparlör/kulaklık
-
-### 2. Kaynak Koddan Kurulum (PowerShell)
 
 ~~~powershell
 # 1. Depoyu bilgisayarınıza klonlayın
@@ -88,7 +116,7 @@ pip install -r requirements.txt
 py app.py
 ~~~
 
-### 3. Otomatik Birim Testlerini Çalıştırma (`15/15`)
+### Otomatik Birim Testlerini Çalıştırma (`15/15`)
 Arapça NLP, kök harf koruma kalkanı (`نَحْلَة` vs `رحلة`), vezin ayrımı (`كِتَاب` vs `كتب`), ardışık tekrar tekilleştirme (`نحلة نحلة` ➔ `نحلة`), mahreç koçu ve SM-2 algoritmasını doğrulamak için:
 
 ~~~powershell
@@ -101,8 +129,10 @@ py tests/test_arabic_nlp.py
 
 ~~~text
 arapca-telaffuz-asistani/
-├── app.py                      # Ana uygulama, 2x2 Dashboard ve pencere yöneticisi
+├── app.py                      # Ana uygulama, 2x2 Dashboard, Single-Instance kilidi ve pencere yöneticisi
 ├── version.json                # GitHub otomatik güncelleme sürüm ve changelog dosyası
+├── installer.iss               # Inno Setup 6 profesyonel kurulum sihirbazı betiği
+├── kilavuz_ve_web_uret.py      # 31 ekran görüntülü PDF Kılavuz ve Web tanıtım sayfası üretici
 ├── requirements.txt            # Python bağımlılık listesi
 ├── LICENSE                     # MIT Açık Kaynak Lisansı
 ├── SECURITY.md                 # Güvenlik politikası ve bildirim rehberi
@@ -118,6 +148,7 @@ arapca-telaffuz-asistani/
 │   ├── dialogue_mode.py        # Diyalog öğrenme ve karşılıklı canlandırma (Roleplay) modülü
 │   ├── dialogs.py              # Sınav/Ders Notu üretici, Dinle & Bul, Shadowing, Raporlar ve Kılavuz
 │   ├── admin_panel.py          # Birleşik Yönetim Paneli, Excel yapıştırma ve kalite denetimi
+│   ├── app_icon.ico            # Windows uygulama ve görev çubuğu ikonu
 │   └── muallimun_logo.png      # Kurumsal uygulama logosu
 ├── data/                       # SQLite veritabanları (kelimeler.db, diyaloglar.db, cumleler.db, sozluk.db, ayarlar.db)
 ├── assets/                     # Görseller (categories/), referans sesler ve TTS önbelleği (tts_cache/)
@@ -145,8 +176,10 @@ Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır. Güvenlik bildirim
 
 ---
 
-## 🌐 İletişim ve Katkı
+## 🌐 İletişim ve Bağlantılar
 
+* **Tanıtım & Çevrimiçi Kılavuz:** [arapca.muallimun.net/arapca-telaffuz-asistani](https://arapca.muallimun.net/arapca-telaffuz-asistani/)
+* **YouTube Tanıtım Videosu:** [youtu.be/ZNEpJisBbEg](https://youtu.be/ZNEpJisBbEg)
 * **Geliştirici & Eğitim Portalı:** [Muallimun.Net](https://www.muallimun.com)
 * **GitHub Deposu:** [github.com/muallimun/arapca-telaffuz-asistani](https://github.com/muallimun/arapca-telaffuz-asistani)
 * **Sorun Bildirimi & Öneriler:** [GitHub Issues](https://github.com/muallimun/arapca-telaffuz-asistani/issues)
