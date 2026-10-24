@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arapça Telaffuz ve Konuşma Asistanı v40.0 — Muallimun.Net</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --panel: #162032;
+    --gold: #ffd369;
+    --green: #00e676;
+    --blue: #3b82f6;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --border: #2b3b55;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  a { color: var(--gold); text-decoration: none; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+  /* ÜST GEZİNTİ BARI */
+  header {
+    background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+  }
+  .nav-row {
+    display: flex; justify-content: space-between; align-items: center; height: 70px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 18px; color: var(--gold); }
+  .brand img { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--gold); }
+  .nav-links { display: flex; gap: 20px; align-items: center; font-size: 14.5px; font-weight: 600; }
+  .btn-dl-top {
+    background: var(--green); color: #0f172a; padding: 9px 18px;
+    border-radius: 8px; font-weight: 800; transition: 0.2s;
+  }
+  .btn-dl-top:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,230,118,0.35); }
+  /* HERO ALANI */
+  .hero {
+    padding: 64px 0 48px 0; text-align: center;
+    background: radial-gradient(circle at 50% 10%, #1e3a8a 0%, #0f172a 65%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-logo {
+    width: 118px; height: 118px; border-radius: 24px;
+    border: 3px solid var(--gold); box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    margin-bottom: 16px;
+  }
+  .hero-ar {
+    font-family: 'Traditional Arabic', serif; font-size: 30px; color: var(--gold);
+    margin-bottom: 8px; direction: rtl;
+  }
+  .hero h1 { font-size: 38px; margin: 0 0 14px 0; font-weight: 900; }
+  .hero p {
+    max-width: 780px; margin: 0 auto 28px auto; font-size: 17px; color: #cbd5e1;
+  }
+  .cta-row { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 36px; }
+  .btn-main-dl {
+    background: var(--green); color: #0f172a; padding: 15px 30px;
+    border-radius: 10px; font-size: 17px; font-weight: 900;
+    display: inline-flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 25px rgba(0,230,118,0.3);
+  }
+  .btn-sec-dl {
+    background: var(--card); color: var(--text); border: 1px solid var(--border);
+    padding: 15px 24px; border-radius: 10px; font-size: 16px; font-weight: 700;
+  }
+  .hero-preview {
+    max-width: 980px; margin: 0 auto; border-radius: 12px;
+    border: 2px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+  .hero-preview img { width: 100%; display: block; }
+  /* İSTATİSTİK ŞERİDİ */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin: 40px 0;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; text-align: center;
+  }
+  .stat-num { font-size: 28px; font-weight: 900; color: var(--gold); }
+  .stat-lbl { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  /* ÖZELLİK KARTLARI */
+  .section-title { text-align: center; margin: 56px 0 32px 0; }
+  .section-title h2 { font-size: 30px; color: var(--gold); margin: 0 0 8px 0; }
+  .section-title p { color: var(--muted); max-width: 680px; margin: 0 auto; }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+  }
+  .f-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+  }
+  .f-card h3 { margin: 0 0 10px 0; color: var(--gold); font-size: 19px; }
+  .f-card p { margin: 0; color: #cbd5e1; font-size: 14.5px; }
+  /* 31 EKRAN GÖRÜNTÜSÜ GALERİSİ */
+  .gallery-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 22px; margin-bottom: 60px;
+  }
+  .g-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .g-img-box {
+    background: #090e1a; padding: 8px; border-bottom: 1px solid var(--border);
+    cursor: zoom-in;
+  }
+  .g-img-box img { width: 100%; height: 210px; object-fit: contain; display: block; }
+  .g-body { padding: 16px; flex: 1; }
+  .g-tag {
+    background: rgba(59,130,246,0.2); color: #93c5fd;
+    font-size: 11.5px; font-weight: 800; padding: 3px 9px; border-radius: 4px;
+  }
+  .g-body h4 { margin: 10px 0 6px 0; font-size: 16px; color: var(--gold); }
+  .g-body p { margin: 0; font-size: 13.5px; color: #cbd5e1; }
+  /* LIGHTBOX */
+  #lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+    z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
+  }
+  #lightbox img { max-width: 94%; max-height: 84vh; border-radius: 8px; border: 2px solid var(--gold); }
+  #lightbox-caption { color: var(--gold); font-size: 17px; font-weight: 700; margin-top: 12px; }
+  footer {
+    background: #090e1a; border-top: 1px solid var(--border);
+    padding: 36px 0; text-align: center; color: var(--muted); font-size: 14px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="container nav-row">
+      <div class="brand">
+        <img src="images/app_icon.png" alt="Logo"/>
+        <span>Arapça Telaffuz ve Konuşma Asistanı</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#ozellikler">Özellikler</a>
+        <a href="#ekranlar">31 Ekran Görüntüsü</a>
+        <a href="Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf" target="_blank">📕 PDF Kılavuz</a>
+        <a href="https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe" class="btn-dl-top">📥 Windows Kurulum İndir</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <img src="images/app_icon.png" alt="App Icon" class="hero-logo"/>
+      <div class="hero-ar">مُخْتَبَرُ النُّطْقِ وَالصَّرْفِ وَالْمُحَادَثَةِ بِالذَّكَاءِ الِاصْطِنَاعِيِّ</div>
+      <h1>Arapça Telaffuz ve Konuşma Asistanı v40.0</h1>
+      <p>
+        Arapçayı sadece gözle okuyarak değil, mikrofona sesli konuşarak öğrenin! Yapay zekâ destekli mahreç analizi,
+        1.500+ kelimelik sülâsî kök sözlüğü, karşılıklı diyalog canlandırma ve öğretmenler için A4 yazılı sınav/ders notu
+        üretim araçları tek pakette.
+      </p>
+      <div class="cta-row">
+        <a href="https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe" class="btn-main-dl">
+          📥 Son Sürümü İndir (Arapca_Telaffuz_Asistani_Setup.exe)
+        </a>
+        <a href="Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf" target="_blank" class="btn-sec-dl">
+          📘 Resimli PDF Kullanım Kılavuzu
+        </a>
+        <a href="https://github.com/muallimun/arapca-telaffuz-asistani" target="_blank" class="btn-sec-dl">
+          🌐 GitHub Deposu
+        </a>
+      </div>
+      <div class="hero-preview">
+        <img src="images/Screenshot_3.png" alt="Ana Ekran Önizleme"/>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-num">1.500+</div><div class="stat-lbl">Sarf Sözlüğü &amp; Sülâsî Kök</div></div>
+      <div class="stat-card"><div class="stat-num">7.952</div><div class="stat-lbl">Anahtar Cümle (A1–C1)</div></div>
+      <div class="stat-card"><div class="stat-num">60 Diyalog</div><div class="stat-lbl">782 Sesli Konuşma Satırı</div></div>
+      <div class="stat-card"><div class="stat-num">%100 Çevrimdışı</div><div class="stat-lbl">Faster-Whisper Ses Analizi</div></div>
+    </div>
+
+    <div class="section-title" id="ozellikler">
+      <h2>🌟 Neden Arapça Telaffuz ve Konuşma Asistanı?</h2>
+      <p>Hem bireysel öğrenenler hem de sınıf içi akıllı tahta uygulamaları için geliştirilmiş modüller.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="f-card">
+        <h3>🏠 Görselli Kelime Modu &amp; SM-2 Tekrar</h3>
+        <p>Kadın ve erkek referans sesleriyle kelimeleri dinleyin, mikrofona okuyun ve Günün 15 Tekrarı (SM-2 algoritması) ile kelimeleri kalıcı hafızaya aktarın.</p>
+      </div>
+      <div class="f-card">
+        <h3>📖 Sarf Sözlüğü &amp; Sülâsî Kök Atölyesi</h3>
+        <p>Altıgen kök rozetiyle kelimelerin 3 asli harfini, Müfret/Cemî ve Mâzî/Muzâri/Masdar çekimlerini ve aynı kökten türeyen akraba kelimeleri keşfedin.</p>
+      </div>
+      <div class="f-card">
+        <h3>💬 Günlük Diyaloglar &amp; Roleplay</h3>
+        <p>60 günlük hayat diyaloğunu dinleyin veya bir rol seçip bilgisayarla karşılıklı Arapça konuşma canlandırması yaparak konuşma karnenizi alın.</p>
+      </div>
+      <div class="f-card">
+        <h3>🎯 Canlı Mahreç &amp; Kök Harf Koçu</h3>
+        <p>Birbirine karıştırılan 35+ harf çiftini (ص-س, ذ-ز, ع-ء, ط-ت, ق-ك vb.), kök harf değişimlerini ve med uzatmalarını anında tespit eden pedagojik koç.</p>
+      </div>
+      <div class="f-card">
+        <h3>🖨️ A4 Yazılı Sınav &amp; Ders Notu Üretici</h3>
+        <p>Öğretmenler için tek tıkla cevap anahtarlı A4 yazılı sınav kağıdı veya iki sütunlu/harekeli temiz ders notu (Handout PDF/HTML) üretimi.</p>
+      </div>
+      <div class="f-card">
+        <h3>🛠️ Kolay Paket &amp; İçerik Yönetimi</h3>
+        <p>Kod yazmadan Excel'den kopyala-yapıştır (Ctrl+V) ile kelime/cümle ekleme, klasörden toplu görsel/ses eşleştirme ve kalite denetimi.</p>
+      </div>
+    </div>
+
+    <div class="section-title" id="ekranlar">
+      <h2>📸 Uygulama Ekran Görüntüleri ve Modül Rehberi (31 Ekran)</h2>
+      <p>Görselleri tam ekran incelemek için üzerlerine tıklayabilirsiniz.</p>
+    </div>
+
+    <div class="gallery-grid">
+      
+        <div class="g-card" data-cat="ch-1">
+          <div class="g-img-box">
+            <img src="images/Screenshot_31.png" alt="7 Adımlı İnteraktif Başlangıç ve Ekran Tanıtım Turu (Onboarding)" loading="lazy" onclick="openLightbox(this.src, '7 Adımlı İnteraktif Başlangıç ve Ekran Tanıtım Turu (Onboarding)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 1 • Ekran #31</span>
+            <h4>7 Adımlı İnteraktif Başlangıç ve Ekran Tanıtım Turu (Onboarding)</h4>
+            <p>Uygulama ilk kez çalıştırıldığında kullanıcıyı 7 adımlı interaktif bir rehber karşılar. Bu turda uygulamanın temel amacı, Ana Sayfa, Kelime Modu, Sarf Sözlüğü, Diyalog/Roleplay, Canlı Mahreç Koçu ve Öğretmen Araçları adım adım tanıtılır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-1">
+          <div class="g-img-box">
+            <img src="images/Screenshot_1.png" alt="Öğrenci / Kullanıcı Profili Kayıt Penceresi" loading="lazy" onclick="openLightbox(this.src, 'Öğrenci / Kullanıcı Profili Kayıt Penceresi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 1 • Ekran #1</span>
+            <h4>Öğrenci / Kullanıcı Profili Kayıt Penceresi</h4>
+            <p>Başlangıç turunun hemen ardından öğrenci veya öğretmenin adını kaydedebileceği karşılama penceresi açılır. Girilen isim ayarlar veritabanına (ayarlar.db) kaydedilir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-1">
+          <div class="g-img-box">
+            <img src="images/Screenshot_30.png" alt="Uygulama İçi Kapsamlı Kullanım Rehberi (Kısayol: F1)" loading="lazy" onclick="openLightbox(this.src, 'Uygulama İçi Kapsamlı Kullanım Rehberi (Kısayol: F1)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 1 • Ekran #30</span>
+            <h4>Uygulama İçi Kapsamlı Kullanım Rehberi (Kısayol: F1)</h4>
+            <p>Klavyeden F1 tuşuna veya üst çubuktaki 📖 simgesine basıldığında açılan 8 bölümlük uygulama içi kılavuz ekranıdır. İnternet bağlantısı gerektirmeden tüm modüllerin kullanımını ve klavye kısayollarını açıklar.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-2">
+          <div class="g-img-box">
+            <img src="images/Screenshot_3.png" alt="Ana Giriş Ekranı — Standart Görünüm (Sağ Panel Açık)" loading="lazy" onclick="openLightbox(this.src, 'Ana Giriş Ekranı — Standart Görünüm (Sağ Panel Açık)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 2 • Ekran #3</span>
+            <h4>Ana Giriş Ekranı — Standart Görünüm (Sağ Panel Açık)</h4>
+            <p>Sol tarafta 4 ana eğitim modülü (Görselli Kelimeler, Sarf Sözlüğü, Günlük Diyaloglar, Anahtar Cümleler), sağ tarafta ise Yönetim Paneli, Tüm Ayarlar, Canlı Mahreç Koçu ve açılır-kapanır akordiyon menüler yer alır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-2">
+          <div class="g-img-box">
+            <img src="images/Screenshot_2.png" alt="Ana Giriş Ekranı — Tam Ekran Odaklanma Modu (Sağ Panel Gizli)" loading="lazy" onclick="openLightbox(this.src, 'Ana Giriş Ekranı — Tam Ekran Odaklanma Modu (Sağ Panel Gizli)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 2 • Ekran #2</span>
+            <h4>Ana Giriş Ekranı — Tam Ekran Odaklanma Modu (Sağ Panel Gizli)</h4>
+            <p>Üst çubuktaki '◧ Paneli Gizle' butonuna basıldığında sağ panel kapanır ve çalışma kartları tüm ekran genişliğine yayılır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-3">
+          <div class="g-img-box">
+            <img src="images/Screenshot_4.png" alt="Görselli Kelime Kartı ve Hareke & Vokal Rehberi" loading="lazy" onclick="openLightbox(this.src, 'Görselli Kelime Kartı ve Hareke & Vokal Rehberi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 3 • Ekran #4</span>
+            <h4>Görselli Kelime Kartı ve Hareke & Vokal Rehberi</h4>
+            <p>Hayvanlar paketindeki 'نَحْلَةٌ (Arı)' kartı. Üst barda Seviye (A1-C1), Paket seçimi, Günün 15 Tekrarı, Dinle & Bul, Tekrarım ve Zayıflar butonları; kart üzerinde ise Tekrar Listeme Ekle, Öğrendim, Seviye etiketi, Kadın/Erkek ses butonları ve Gölgele aracı yer alır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-3">
+          <div class="g-img-box">
+            <img src="images/Screenshot_28.png" alt="Canlı Mahreç ve Harf/Kök Değişimi Yakalama Örneği (Kırmızı Vurgu)" loading="lazy" onclick="openLightbox(this.src, 'Canlı Mahreç ve Harf/Kök Değişimi Yakalama Örneği (Kırmızı Vurgu)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 3 • Ekran #28</span>
+            <h4>Canlı Mahreç ve Harf/Kök Değişimi Yakalama Örneği (Kırmızı Vurgu)</h4>
+            <p>Öğrenci 'نَحْلَة' kelimesini okurken son harfi değiştirerek 'تحلى' şeklinde telaffuz ettiğinde; sistem doğruluğu %53'e düşürür, '❌ TEKRAR DENE' uyarısı verir ve sağ paneldeki Canlı Mahreç Koçunda hedef kelimeyi kırmızı kutu içinde vurgulayarak hangi harfin hangi sesle karıştığını açıklar.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-4">
+          <div class="g-img-box">
+            <img src="images/Screenshot_7.png" alt="Sarf Sözlüğü ve Sülâsî Kök Ailesi Atölyesi Ekranı" loading="lazy" onclick="openLightbox(this.src, 'Sarf Sözlüğü ve Sülâsî Kök Ailesi Atölyesi Ekranı')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 4 • Ekran #7</span>
+            <h4>Sarf Sözlüğü ve Sülâsî Kök Ailesi Atölyesi Ekranı</h4>
+            <p>Üst kısımda anlık kök/kelime/anlam arama kutusu, Tür (isim/fiil) ve Tematik Kategori (🏥 Sağlık, 🍽️ Yemek, ✈️ Seyahat, 🎓 Eğitim vb.) filtreleri yer alır. Sağ panelde seçili kelimenin altıgen kök rozeti, sesli çekim butonları ve '🎤 Bu Kelimeyi Kartta Çalış' butonu bulunur.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-5">
+          <div class="g-img-box">
+            <img src="images/Screenshot_5.png" alt="Diyalog Modu — Sohbet Balonları ve Satır İçi Kontroller" loading="lazy" onclick="openLightbox(this.src, 'Diyalog Modu — Sohbet Balonları ve Satır İçi Kontroller')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 5 • Ekran #5</span>
+            <h4>Diyalog Modu — Sohbet Balonları ve Satır İçi Kontroller</h4>
+            <p>[A1] Tanışmak (التَّعَارُفُ) diyaloğu. Konuşmacıların cinsiyetine göre (Ömer: Erkek sesi, Deniz: Kadın sesi) otomatik ses ataması yapılır. Sağ üstten Hareke, Türkçe çeviri ve yazı boyutu (A- / A+ Punto) anlık olarak ayarlanabilir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-6">
+          <div class="g-img-box">
+            <img src="images/Screenshot_6.png" alt="Anahtar Cümleler Modu Ekranı" loading="lazy" onclick="openLightbox(this.src, 'Anahtar Cümleler Modu Ekranı')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 6 • Ekran #6</span>
+            <h4>Anahtar Cümleler Modu Ekranı</h4>
+            <p>Filtre (Tümü, 📅 Günün 15 Tekrarı, Favoriler, Öğrendiklerim, Zorlandıklarım) ve Seviye (A1-C1) seçimi, cümle numarasına doğrudan gitme kutusu ('53 Git') ve kelime bazlı değerlendirme alanı.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-6">
+          <div class="g-img-box">
+            <img src="images/Screenshot_29.png" alt="Gölgeleme (Shadowing) Akıcılık ve Ritim Antrenmanı Penceresi" loading="lazy" onclick="openLightbox(this.src, 'Gölgeleme (Shadowing) Akıcılık ve Ritim Antrenmanı Penceresi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 6 • Ekran #29</span>
+            <h4>Gölgeleme (Shadowing) Akıcılık ve Ritim Antrenmanı Penceresi</h4>
+            <p>'🎬 Gölgelemeyi Başlat' butonuna basıldığında önce referans ses çalınır ve mavi dalga grafiği çizilir; hemen ardından bip sesiyle mikrofon açılır ve öğrenci beklemeden aynı hız ve tonlamayla cümleyi tekrar eder.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-7">
+          <div class="g-img-box">
+            <img src="images/Screenshot_23.png" alt="Canlı Mahreç & Hareke Koçu (Yakın Plan)" loading="lazy" onclick="openLightbox(this.src, 'Canlı Mahreç & Hareke Koçu (Yakın Plan)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 7 • Ekran #23</span>
+            <h4>Canlı Mahreç & Hareke Koçu (Yakın Plan)</h4>
+            <p>Kart üzerindeki metnin hareke dizilimini (Fetha, Kesra, Damme, Şedde, Cezim/Sükûn) otomatik sayar ve ses kaydı sonrasında kelime doğruluğu ile mahreç ipuçlarını renkli olarak listeler.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-7">
+          <div class="g-img-box">
+            <img src="images/Screenshot_24.png" alt="Hızlı Ayarlar Akordiyon Menüsü (Açık Görünüm)" loading="lazy" onclick="openLightbox(this.src, 'Hızlı Ayarlar Akordiyon Menüsü (Açık Görünüm)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 7 • Ekran #24</span>
+            <h4>Hızlı Ayarlar Akordiyon Menüsü (Açık Görünüm)</h4>
+            <p>Ayarlar penceresine gitmeden tek tıkla Eller Serbest Mod (Otomatik Kayıt), Yavaş Seslendirme (%25), Geçişte Otomatik Seslendir, Doğru Bilince Otomatik İlerle, Rastgele Sıra ve Ses Tercihi (Sırayla/Kadın/Erkek) değiştirilebilir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-7">
+          <div class="g-img-box">
+            <img src="images/Screenshot_25.png" alt="İstatistikler & Kayıtlar Akordiyon Menüsü (Açık Görünüm)" loading="lazy" onclick="openLightbox(this.src, 'İstatistikler & Kayıtlar Akordiyon Menüsü (Açık Görünüm)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 7 • Ekran #25</span>
+            <h4>İstatistikler & Kayıtlar Akordiyon Menüsü (Açık Görünüm)</h4>
+            <p>Aktif moda ait Doğru, Yanlış ve Başarı yüzdesini gösterir. '🔄 Sıfırla' ile istatistikler sıfırlanabilir, '🧹 Kayıtları Temizle' ile recordings/ klasöründeki ses dosyaları temizlenebilir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-8">
+          <div class="g-img-box">
+            <img src="images/Screenshot_8.png" alt="Dinle & Bul — Sesli Sınav ve Pratik Merkezi" loading="lazy" onclick="openLightbox(this.src, 'Dinle & Bul — Sesli Sınav ve Pratik Merkezi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 8 • Ekran #8</span>
+            <h4>Dinle & Bul — Sesli Sınav ve Pratik Merkezi</h4>
+            <p>Üst bardan Kaynak, Paket, Seviye ve Soru Hedefi seçildikten sonra '▶️ SINAVI BAŞLAT' butonuna basılır. Sistem Arapça ifadeyi seslendirir ve öğrenci A, B, C, D şıklarından doğru Türkçe karşılığı seçer.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-8">
+          <div class="g-img-box">
+            <img src="images/Screenshot_9.png" alt="Gelişim Karnesi — Rozetler & Kilometre Taşları Sekmesi" loading="lazy" onclick="openLightbox(this.src, 'Gelişim Karnesi — Rozetler & Kilometre Taşları Sekmesi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 8 • Ekran #9</span>
+            <h4>Gelişim Karnesi — Rozetler & Kilometre Taşları Sekmesi</h4>
+            <p>Öğrencinin kazandığı başarı rozetlerini (🔥 İlk Kıvılcım, 🎯 Kelime Avcısı, 💬 Muhâdese Yıldızı, 📜 Cümle Üstadı, ⚡ İstikrar Abidesi, 👑 Arapça Hatibi) ve son Dinle & Bul sınav sonucunu gösterir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-8">
+          <div class="g-img-box">
+            <img src="images/Screenshot_26.png" alt="Öğretmen Raporu, Paket Başarı Grafikleri ve Ödev Paketi Araçları" loading="lazy" onclick="openLightbox(this.src, 'Öğretmen Raporu, Paket Başarı Grafikleri ve Ödev Paketi Araçları')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 8 • Ekran #26</span>
+            <h4>Öğretmen Raporu, Paket Başarı Grafikleri ve Ödev Paketi Araçları</h4>
+            <p>Hem üst menüdeki '📊 Raporlar' butonundan hem de Ana Sayfadaki Öğretmen Araçları barından erişilebilen rapor merkezi.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-9">
+          <div class="g-img-box">
+            <img src="images/Screenshot_10.png" alt="A4 Yazılı Sınav, Ders Notu ve Quiz Üretici (Anahtar Cümleler)" loading="lazy" onclick="openLightbox(this.src, 'A4 Yazılı Sınav, Ders Notu ve Quiz Üretici (Anahtar Cümleler)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 9 • Ekran #10</span>
+            <h4>A4 Yazılı Sınav, Ders Notu ve Quiz Üretici (Anahtar Cümleler)</h4>
+            <p>6 farklı soru bölümünün (Arapça➔Türkçe, Türkçe➔Arapça, Boşluk Doldurma, 4 Şıklı Test, Eşleştirme, Sarf Tablosu) soru sayıları 0 ile 50 arasında ayrı ayrı belirlenebilir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-9">
+          <div class="g-img-box">
+            <img src="images/Screenshot_27.png" alt="Günlük Diyaloglar İçin Ders Notu (Handout) ve Sınav Ayarları" loading="lazy" onclick="openLightbox(this.src, 'Günlük Diyaloglar İçin Ders Notu (Handout) ve Sınav Ayarları')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 9 • Ekran #27</span>
+            <h4>Günlük Diyaloglar İçin Ders Notu (Handout) ve Sınav Ayarları</h4>
+            <p>Materyal kaynağı olarak '💬 Günlük Diyaloglar' ve belirli bir diyalog (Örn: [dlg_01] Tanışmak) seçildiğinde, alt kısımdaki '📖 Ders Notu / Okuma Metni Formatı' kutusu kullanılarak öğrencilere dağıtılacak diyalog okuma yaprağı hazırlanabilir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-9">
+          <div class="g-img-box">
+            <img src="images/Screenshot_22.png" alt="Yönetim Paneli İçinden Doğrudan Sınav & Ders Notu Üretimi" loading="lazy" onclick="openLightbox(this.src, 'Yönetim Paneli İçinden Doğrudan Sınav & Ders Notu Üretimi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 9 • Ekran #22</span>
+            <h4>Yönetim Paneli İçinden Doğrudan Sınav & Ders Notu Üretimi</h4>
+            <p>Yönetim & Paket Panelinde üzerinde çalışılan herhangi bir paketin '🖨️ Sınav & Ders Notu' butonuna basıldığında o paket otomatik seçili olarak sınav üretici açılır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-9">
+          <div class="g-img-box">
+            <img src="images/Screenshot_11.png" alt="Üretilen A4 Yazılı Sınav Kağıdının Tarayıcı ve Baskı Önizlemesi" loading="lazy" onclick="openLightbox(this.src, 'Üretilen A4 Yazılı Sınav Kağıdının Tarayıcı ve Baskı Önizlemesi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 9 • Ekran #11</span>
+            <h4>Üretilen A4 Yazılı Sınav Kağıdının Tarayıcı ve Baskı Önizlemesi</h4>
+            <p>Kurumsal antet, logo, Öğrenci Adı Soyadı / Sınıf / Tarih / Puan kutusu ve geniş yazma satırlarıyla oluşturulan A4 sınav kağıdı. Üstteki yeşil butonla doğrudan yazıcıya gönderilebilir veya PDF olarak kaydedilebilir.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-10">
+          <div class="g-img-box">
+            <img src="images/Screenshot_12.png" alt="Ayarlar 1. Sekme: 🏠 Genel & Çalışma Ayarları" loading="lazy" onclick="openLightbox(this.src, 'Ayarlar 1. Sekme: 🏠 Genel & Çalışma Ayarları')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 10 • Ekran #12</span>
+            <h4>Ayarlar 1. Sekme: 🏠 Genel & Çalışma Ayarları</h4>
+            <p>Çalışma akışı, öğrenci adı, deneme hakkı sınırı (1, 2, 3, 5 Kez veya Sınırsız) ve Sınav Modu (Arapçayı Gizle) kontrolleri.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-10">
+          <div class="g-img-box">
+            <img src="images/Screenshot_13.png" alt="Ayarlar 2. Sekme: 🔊 Ses & TTS Ayarları" loading="lazy" onclick="openLightbox(this.src, 'Ayarlar 2. Sekme: 🔊 Ses & TTS Ayarları')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 10 • Ekran #13</span>
+            <h4>Ayarlar 2. Sekme: 🔊 Ses & TTS Ayarları</h4>
+            <p>Seslendirme cinsiyeti tercihi, yavaş seslendirme (%25) ve referans sesin peş peşe kaç kez (1-3) çalınacağının belirlendiği sekme.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-10">
+          <div class="g-img-box">
+            <img src="images/Screenshot_14.png" alt="Ayarlar 3. Sekme: 💬 Diyalog & Ölçme Ayarları" loading="lazy" onclick="openLightbox(this.src, 'Ayarlar 3. Sekme: 💬 Diyalog & Ölçme Ayarları')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 10 • Ekran #14</span>
+            <h4>Ayarlar 3. Sekme: 💬 Diyalog & Ölçme Ayarları</h4>
+            <p>Karşılıklı diyalog canlandırma (Roleplay) sırasında öğrenciye her cümle için tanınacak deneme hakkı ve kademeli kelime açma ayarı.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-10">
+          <div class="g-img-box">
+            <img src="images/Screenshot_15.png" alt="Ayarlar 4. Sekme: 🎨 Görünüm & Tema Ayarları" loading="lazy" onclick="openLightbox(this.src, 'Ayarlar 4. Sekme: 🎨 Görünüm & Tema Ayarları')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 10 • Ekran #15</span>
+            <h4>Ayarlar 4. Sekme: 🎨 Görünüm & Tema Ayarları</h4>
+            <p>Aydınlık ve Karanlık mod geçişi ile Kelime, Diyalog ve Cümle modlarında hareke ve Türkçe çeviri görünürlük ayarları.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-10">
+          <div class="g-img-box">
+            <img src="images/Screenshot_16.png" alt="Ayarlar 5. Sekme: 🛠️ Depolama & Bakım Ayarları" loading="lazy" onclick="openLightbox(this.src, 'Ayarlar 5. Sekme: 🛠️ Depolama & Bakım Ayarları')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 10 • Ekran #16</span>
+            <h4>Ayarlar 5. Sekme: 🛠️ Depolama & Bakım Ayarları</h4>
+            <p>recordings/ klasöründe biriken öğrenci ses kayıtlarının diskte yer kaplamaması için son 10 kaydı tutup eskileri otomatik silme ayarı ve Veritabanı Metin Doktoru.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-10">
+          <div class="g-img-box">
+            <img src="images/Screenshot_17.png" alt="Ayarlar 6. Sekme: 🔄 GitHub Otomatik Güncelleme Merkezi" loading="lazy" onclick="openLightbox(this.src, 'Ayarlar 6. Sekme: 🔄 GitHub Otomatik Güncelleme Merkezi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 10 • Ekran #17</span>
+            <h4>Ayarlar 6. Sekme: 🔄 GitHub Otomatik Güncelleme Merkezi</h4>
+            <p>Uygulamanın kurulu sürümünü (v40.0) ve resmi GitHub deposunu gösterir; manuel güncelleme kontrolü başlatır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-11">
+          <div class="g-img-box">
+            <img src="images/Screenshot_18.png" alt="Yönetim & Paket Paneli Ana Ekranı (Sütun Sıralamalı ve Çoklu Seçimli)" loading="lazy" onclick="openLightbox(this.src, 'Yönetim & Paket Paneli Ana Ekranı (Sütun Sıralamalı ve Çoklu Seçimli)')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 11 • Ekran #18</span>
+            <h4>Yönetim & Paket Paneli Ana Ekranı (Sütun Sıralamalı ve Çoklu Seçimli)</h4>
+            <p>Üstte Kelimeler, Diyaloglar ve Cümleler sekmeleri; ortada paket aksiyon butonları ve 1.000'erli sayfalanmış (veya tek listede) sıralanabilir tablo; en altta ise tekil kayıt ekleme, güncelleme, toplu seviye atama ve mikrofon/medya bağlama formu yer alır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-11">
+          <div class="g-img-box">
+            <img src="images/Screenshot_19.png" alt="Uygulama İçi Paket, Sözlük ve Medya Hazırlama Rehberi" loading="lazy" onclick="openLightbox(this.src, 'Uygulama İçi Paket, Sözlük ve Medya Hazırlama Rehberi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 11 • Ekran #19</span>
+            <h4>Uygulama İçi Paket, Sözlük ve Medya Hazırlama Rehberi</h4>
+            <p>Yönetim Panelinin sağ üst köşesindeki '📘 Paket Rehberi' butonuna basıldığında açılan ve 5 farklı içerik ekleme yöntemini örnek şablonlarla anlatan rehber ekranı.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-11">
+          <div class="g-img-box">
+            <img src="images/Screenshot_20.png" alt="Excel / Panodan (Clipboard) Hızlı Yapıştır ve Aktar Penceresi" loading="lazy" onclick="openLightbox(this.src, 'Excel / Panodan (Clipboard) Hızlı Yapıştır ve Aktar Penceresi')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 11 • Ekran #20</span>
+            <h4>Excel / Panodan (Clipboard) Hızlı Yapıştır ve Aktar Penceresi</h4>
+            <p>'📋 Excel Yapıştır' butonuna basıldığında açılır. Hedef Paket ID, Paket Başlığı ve Seviye seçildikten sonra Excel'den kopyalanan satırlar metin alanına yapıştırılır ve tek tıkla veritabanına aktarılır.</p>
+          </div>
+        </div>
+        <div class="g-card" data-cat="ch-11">
+          <div class="g-img-box">
+            <img src="images/Screenshot_21.png" alt="Paket Kalite Denetleyicisi Raporu Ekranı" loading="lazy" onclick="openLightbox(this.src, 'Paket Kalite Denetleyicisi Raporu Ekranı')"/>
+          </div>
+          <div class="g-body">
+            <span class="g-tag">Bölüm 11 • Ekran #21</span>
+            <h4>Paket Kalite Denetleyicisi Raporu Ekranı</h4>
+            <p>'🔍 Denetim' butonuna basıldığında seçili paketteki tüm kayıtları tarar; harekesiz Arapça metinleri, boş Türkçe çevirileri, parantez içi rakamları ve bulunamayan ses dosyalarını listeler.</p>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <div id="lightbox" onclick="this.style.display='none'">
+    <img id="lightbox-img" src="" alt=""/>
+    <div id="lightbox-caption"></div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p><b>Arapça Telaffuz ve Konuşma Asistanı v40.0 (Gold Master)</b> — <a href="https://www.muallimun.com">Muallimun.Net</a></p>
+      <p>Açık Kaynaklı Eğitim Projesi • <a href="https://github.com/muallimun/arapca-telaffuz-asistani">GitHub</a> • <a href="https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe">Son Sürüm Kurulum Paketi (.exe)</a></p>
+    </div>
+  </footer>
+
+  <script>
+    function openLightbox(src, title) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-caption').innerText = title;
+      document.getElementById('lightbox').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
