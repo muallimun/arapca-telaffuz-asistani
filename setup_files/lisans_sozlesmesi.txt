@@ -1,0 +1,26 @@
+﻿========================================================================
+ARAPÇA TELAFFUZ VE KONUŞMA ASİSTANI (v40.0 Gold Master)
+KULLANIM VE LİSANS SÖZLEŞMESİ — MUALLİMUN.NET
+========================================================================
+
+1. KULLANIM AMACI VE LİSANS HAKKI
+Bu yazılım; Arapça öğrenen öğrenciler, öğretmenler, İmam Hatip Liseleri,
+İlahiyat Fakülteleri ve bireysel kullanıcılar için Muallimun.Net tarafından
+geliştirilmiş yapay zekâ destekli bir telaffuz (mahreç), sarf (kök/türev)
+ve konuşma (muhâdese) eğitim laboratuvarıdır.
+
+2. EĞİTİMDE ÜCRETSİZ KULLANIM VE DAĞITIM
+• Bu uygulama eğitim kurumlarında, akıllı tahtalarda ve kişisel bilgisayarlarda
+  ücretsiz olarak kurulabilir, kullanılabilir ve çoğaltılabilir.
+• Öğretmenler uygulama içindeki "Yönetim & Paket Paneli" ve "Yazılı Sınav &
+  Ders Notu Üretici" araçlarıyla kendi eğitim materyallerini hazırlayabilir.
+
+3. VERİ GİZLİLİĞİ VE ÇEVRİMDIŞI ÇALIŞMA
+• Uygulama içindeki konuşma tanıma motoru (Faster-Whisper) ve veritabanları
+  (SQLite) tamamen bilgisayarınızda yerel (çevrimdışı) olarak çalışır.
+• Öğrenci ses kayıtları yalnızca kendi bilgisayarınızdaki "recordings/"
+  klasöründe saklanır; dış sunuculara gönderilmez.
+
+Resmî Web Sitesi : https://www.muallimun.com
+GitHub Deposu    : https://github.com/muallimun/arapca-telaffuz-asistani
+========================================================================

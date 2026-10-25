@@ -1,0 +1,24 @@
+﻿========================================================================
+🎉 KURULUM BAŞARIYLA TAMAMLANDI! — İLK KULLANIM İPUÇLARI
+========================================================================
+
+Uygulama bilgisayarınıza başarıyla kuruldu. Başlamadan önce şu pratik
+bilgilere göz atabilirsiniz:
+
+🎙️ 1. MİKROFON İZNİ VE KULLANIMI
+• Telaffuz değerlendirmesi için bilgisayarınıza bağlı bir mikrofon bulunmalıdır.
+• Windows "Ayarlar > Gizlilik > Mikrofon" bölümünden masaüstü uygulamalarının
+  mikrofon erişimine izin verildiğinden emin olun.
+
+⌨️ 2. PRATİK KLAVYE KISAYOLLARI
+• [Boşluk / Space]   : Ses kaydını başlatır veya durdurur.
+• [Sağ Ok / Sol Ok]  : Sonraki veya önceki kelime/cümle kartına geçer.
+• [F1]               : Uygulama içi kapsamlı Kullanım Kılavuzunu açar.
+
+🔄 3. OTOMATİK GÜNCELLEME VE KALDIRMA (UNINSTALL)
+• Uygulama, üst çubuktaki "🔄" butonuyla GitHub üzerinden yeni sürümleri
+  otomatik kontrol eder ve verilerinizi koruyarak günceller.
+• Uygulamayı istediğiniz zaman "Denetim Masası > Program Ekle/Kaldır"
+  veya Başlat Menüsündeki "Arapça Asistanı'nı Kaldır" kısayoluyla
+  bilgisayarınızdan tamamen kaldırabilirsiniz.
+========================================================================

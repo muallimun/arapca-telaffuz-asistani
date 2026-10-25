@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 setup_hazirla.py — Inno Setup İçin Tanıtım Metinleri, Banner Görselleri ve installer.iss Üretici
-Çalıştırma: py setup_hazirla.py
+Çalıştırma: .\.venv\Scripts\python.exe setup_hazirla.py
 """
 
 import os
@@ -21,7 +21,7 @@ if os.path.exists(icon_png):
 
     # Sağ üst köşe logosu (128x128)
     bg_small = Image.new("RGB", (128, 128), (15, 23, 42))  # #0f172a
-    ico_s = img. copy()
+    ico_s = img.copy()
     ico_s.thumbnail((112, 112), Image.LANCZOS)
     bg_small.paste(ico_s, ((128 - ico_s.width) // 2, (128 - ico_s.height) // 2), ico_s)
     bg_small.save(small_bmp, format="BMP")
@@ -146,8 +146,11 @@ with open(os.path.join(SETUP_ASSETS_DIR, "ilk_kullanim_rehberi.txt"), "w", encod
 
 print("✅ Kurulum metin dosyaları (UTF-8 BOM) oluşturuldu.")
 
-# 5. Ana Dizindeki veya dist/ İçindeki Klasörü Otomatik Algıla
-source_dir = "ArapcaAsistani" if os.path.exists(os.path.join(BASE_DIR, "ArapcaAsistani", "ArapcaAsistani.exe")) else r"dist\ArapcaAsistani"
+# 5. Öncelikli olarak yeni derlenen dist\ArapcaAsistani klasörünü seç
+if os.path.exists(os.path.join(BASE_DIR, "dist", "ArapcaAsistani", "ArapcaAsistani.exe")):
+    source_dir = r"dist\ArapcaAsistani"
+else:
+    source_dir = "ArapcaAsistani"
 
 iss_content = f"""; =====================================================================
 ; Inno Setup 6 Profesyonel Kurulum Betiği (installer.iss)
@@ -199,9 +202,9 @@ UninstallDisplayName={{#MyAppName}} v{{#MyAppVersion}}
 UninstallDisplayIcon={{app}}\\{{#MyAppExeName}}
 CreateUninstallRegKey=yes
 
-; Çıktı ve Yüksek Sıkıştırma Ayarları (~300 MB -> ~100 MB)
+; Standart Çıktı Dosyası Adı ve Yüksek Sıkıştırma Ayarları
 OutputDir=Output
-OutputBaseFilename=Arapca_Telaffuz_Asistani_v40_Setup
+OutputBaseFilename=Arapca_Telaffuz_Asistani_Setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesAllowed=x64compatible
@@ -254,7 +257,65 @@ Type: filesandordirs; Name: "{{app}}\\__pycache__"
 Type: files; Name: "{{app}}\\uygulama.log"
 
 [Code]
-// Kaldırma (Uninstall) sırasında kullanıcıya çalışma verilerini ve ses kayıtlarını silmek isteyip istemediğini sorar
+// 1. Mevcut kurulumun kaldırma (Uninstall) dosya yolunu Kayıt Defteri'nden bulur
+function GetUninstallString(): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+begin
+  sUnInstPath := 'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{{D37F8E41-89B2-4A8E-BF88-39F80C9C7E41}}_is1';
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    if not RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString) then
+      if not RegQueryStringValue(HKLM32, sUnInstPath, 'UninstallString', sUnInstallString) then
+        RegQueryStringValue(HKCU32, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+// 2. Kurulum başlarken uygulama zaten kuruluysa kullanıcıyı uyarır, önce eski sürümü kaldırır ve sonra yenisini kurar
+function InitializeSetup(): Boolean;
+var
+  sUnInstallString: String;
+  iResultCode: Integer;
+  iWaitCount: Integer;
+begin
+  Result := True;
+  sUnInstallString := GetUninstallString();
+  if sUnInstallString <> '' then
+  begin
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    if FileExists(sUnInstallString) then
+    begin
+      if MsgBox('Bilgisayarınızda "' + '{{#MyAppName}}' + '" zaten kurulu görünüyor.' + #13#10 + #13#10 +
+                'Yeni kurulumun temiz ve sorunsuz yapılabilmesi için önce mevcut kurulum kaldırılacak, hemen ardından yeni kurulum başlatılacaktır.' + #13#10 + #13#10 +
+                'Önceki kurulumu kaldırıp yeni kuruluma devam etmek istiyor musunuz?',
+                mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES then
+      begin
+        if not Exec(sUnInstallString, '/SILENT /NORESTART', '', SW_SHOW, ewWaitUntilTerminated, iResultCode) then
+        begin
+          MsgBox('Önceki sürüm kaldırılırken bir hata oluştu (Hata Kodu: ' + IntToStr(iResultCode) + '). Kurulum iptal edildi.', mbError, MB_OK);
+          Result := False;
+        end
+        else
+        begin
+          // Arka plandaki kaldırma işleminin dosyaları tamamen temizlemesini bekle
+          iWaitCount := 0;
+          while FileExists(sUnInstallString) and (iWaitCount < 60) do
+          begin
+            Sleep(300);
+            iWaitCount := iWaitCount + 1;
+          end;
+        end;
+      end
+      else
+      begin
+        Result := False;
+      end;
+    end;
+  end;
+end;
+
+// 3. Kaldırma (Uninstall) sırasında kullanıcıya çalışma verilerini ve ses kayıtlarını silmek isteyip istemediğini sorar
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
@@ -263,7 +324,7 @@ begin
     begin
       if MsgBox('Uygulama dosyaları kaldırıldı.' + #13#10 + #13#10 +
                 'Öğrenci çalışma istatistiklerinizi, sonradan eklediğiniz ses kayıtlarını (recordings/) ve önbellek dosyalarını da tamamen silmek ister misiniz?' + #13#10 +
-                '(Daha sonra tekrar kurmayı düşünüyorsanız "Hayır" diyerek verilerinizi koruyabilirsiniz.)',
+                '(Yeni sürümü kuruyorsanız veya verilerinizi korumak istiyorsanız "Hayır" seçeneğine tıklayın.)',
                 mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
       begin
         DelTree(ExpandConstant('{{app}}'), True, True, True);
@@ -277,4 +338,4 @@ iss_path = os.path.join(BASE_DIR, "installer.iss")
 with open(iss_path, "w", encoding="utf-8-sig") as f:
     f.write(iss_content)
 
-print(f"✅ 'installer.iss' başarıyla oluşturuldu (Kaynak: {source_dir}).")
+print(f"✅ 'installer.iss' başarıyla oluşturuldu (Kaynak: {source_dir}, Çıktı: Arapca_Telaffuz_Asistani_Setup.exe).")

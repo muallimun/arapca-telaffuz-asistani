@@ -48,7 +48,7 @@ UninstallDisplayName={#MyAppName} v{#MyAppVersion}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 CreateUninstallRegKey=yes
 
-; Çıktı ve Yüksek Sıkıştırma Ayarları (~300 MB -> ~100 MB)
+; Standart Çıktı Dosyası Adı ve Yüksek Sıkıştırma Ayarları
 OutputDir=Output
 OutputBaseFilename=Arapca_Telaffuz_Asistani_Setup
 Compression=lzma2/ultra64
@@ -103,7 +103,65 @@ Type: filesandordirs; Name: "{app}\__pycache__"
 Type: files; Name: "{app}\uygulama.log"
 
 [Code]
-// Kaldırma (Uninstall) sırasında kullanıcıya çalışma verilerini ve ses kayıtlarını silmek isteyip istemediğini sorar
+// 1. Mevcut kurulumun kaldırma (Uninstall) dosya yolunu Kayıt Defteri'nden bulur
+function GetUninstallString(): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+begin
+  sUnInstPath := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{D37F8E41-89B2-4A8E-BF88-39F80C9C7E41}_is1';
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    if not RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString) then
+      if not RegQueryStringValue(HKLM32, sUnInstPath, 'UninstallString', sUnInstallString) then
+        RegQueryStringValue(HKCU32, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+// 2. Kurulum başlarken uygulama zaten kuruluysa kullanıcıyı uyarır, önce eski sürümü kaldırır ve sonra yenisini kurar
+function InitializeSetup(): Boolean;
+var
+  sUnInstallString: String;
+  iResultCode: Integer;
+  iWaitCount: Integer;
+begin
+  Result := True;
+  sUnInstallString := GetUninstallString();
+  if sUnInstallString <> '' then
+  begin
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    if FileExists(sUnInstallString) then
+    begin
+      if MsgBox('Bilgisayarınızda "' + '{#MyAppName}' + '" zaten kurulu görünüyor.' + #13#10 + #13#10 +
+                'Yeni kurulumun temiz ve sorunsuz yapılabilmesi için önce mevcut kurulum kaldırılacak, hemen ardından yeni kurulum başlatılacaktır.' + #13#10 + #13#10 +
+                'Önceki kurulumu kaldırıp yeni kuruluma devam etmek istiyor musunuz?',
+                mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES then
+      begin
+        if not Exec(sUnInstallString, '/SILENT /NORESTART', '', SW_SHOW, ewWaitUntilTerminated, iResultCode) then
+        begin
+          MsgBox('Önceki sürüm kaldırılırken bir hata oluştu (Hata Kodu: ' + IntToStr(iResultCode) + '). Kurulum iptal edildi.', mbError, MB_OK);
+          Result := False;
+        end
+        else
+        begin
+          // Arka plandaki kaldırma işleminin dosyaları tamamen temizlemesini bekle
+          iWaitCount := 0;
+          while FileExists(sUnInstallString) and (iWaitCount < 60) do
+          begin
+            Sleep(300);
+            iWaitCount := iWaitCount + 1;
+          end;
+        end;
+      end
+      else
+      begin
+        Result := False;
+      end;
+    end;
+  end;
+end;
+
+// 3. Kaldırma (Uninstall) sırasında kullanıcıya çalışma verilerini ve ses kayıtlarını silmek isteyip istemediğini sorar
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
@@ -112,7 +170,7 @@ begin
     begin
       if MsgBox('Uygulama dosyaları kaldırıldı.' + #13#10 + #13#10 +
                 'Öğrenci çalışma istatistiklerinizi, sonradan eklediğiniz ses kayıtlarını (recordings/) ve önbellek dosyalarını da tamamen silmek ister misiniz?' + #13#10 +
-                '(Daha sonra tekrar kurmayı düşünüyorsanız "Hayır" diyerek verilerinizi koruyabilirsiniz.)',
+                '(Yeni sürümü kuruyorsanız veya verilerinizi korumak istiyorsanız "Hayır" seçeneğine tıklayın.)',
                 mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
       begin
         DelTree(ExpandConstant('{app}'), True, True, True);

@@ -1,0 +1,42 @@
+﻿========================================================================
+🌟 ARAPÇA TELAFFUZ VE KONUŞMA ASİSTANI'NA HOŞ GELDİNİZ!
+========================================================================
+
+Bu kurulum sihirbazı, "Arapça Telaffuz ve Konuşma Asistanı (v40.0)"
+uygulamasını bilgisayarınıza kuracaktır.
+
+------------------------------------------------------------------------
+📌 PROGRAMIN TEMEL ÖZELLİKLERİ VE MODÜLLERİ
+------------------------------------------------------------------------
+1. 🏠 Görselli Kelime Modu & Gölgeleme (Shadowing):
+   • Kadın ve erkek referans sesleriyle kelimeleri dinleyin.
+   • Mikrofona konuşarak yapay zekâ ile telaffuz doğruluğunuzu test edin.
+   • "Günün 15 Tekrarı (SM-2)" ile kelimeleri kalıcı hafızaya aktarın.
+
+2. 📖 Sarf Sözlüğü & Sülâsî Kök Ailesi Atölyesi:
+   • 1.500+ kelimenin 3 harfli sülâsî köklerini (Altıgen Kök Rozeti),
+     Müfret/Cemî ve Mâzî/Muzâri/Masdar çekimlerini etkileşimli keşfedin.
+
+3. 💬 Günlük Diyaloglar (Muhâdesât) & Karşılıklı Rol Yapma (Roleplay):
+   • Günlük hayat diyaloglarını satır satır dinleyin veya bir rol seçerek
+     bilgisayarla karşılıklı Arapça konuşma canlandırması yapın.
+
+4. 📜 Anahtar Cümleler & 🎯 Canlı Mahreç Koçu:
+   • Cümle içindeki doğru (yeşil) ve hatalı (kırmızı) kelimeleri anında görün.
+   • Birbirine karıştırılan harfler (ص-س, ذ-ز, ع-ء, ط-ت, ق-ك vb.) ve med
+     uzatmaları için Canlı Mahreç Koçundan anında pedagojik ipucu alın.
+
+5. 🎧 Dinle & Bul Sınav Merkezi ve 🖨️ A4 Yazılı Sınav / Ders Notu Üretici:
+   • 4 şıklı sesli dinleme sınavları çözün.
+   • Öğretmenler için tek tıkla cevap anahtarlı A4 yazılı sınav kağıdı veya
+     iki sütunlu/harekeli temiz ders notu (PDF/HTML) üretin.
+
+------------------------------------------------------------------------
+🛠️ KURULUM ADIMLARI (5 KOLAY ADIM)
+------------------------------------------------------------------------
+• Adım 1 : Lisans sözleşmesini onaylayın ve bu tanıtım ekranını geçin.
+• Adım 2 : Kurulum klasörünü seçin (Varsayılan klasör önerilir).
+• Adım 3 : "Masaüstü kısayolu oluştur" seçeneğini işaretleyin.
+• Adım 4 : "Kur (Install)" butonuna basarak dosyaların kopyalanmasını bekleyin.
+• Adım 5 : Kurulum tamamlandığında uygulamayı doğrudan başlatın.
+========================================================================
