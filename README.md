@@ -2,7 +2,7 @@
 
 [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v40.0%20Gold%20Master-10b981?style=for-the-badge)](https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest)
 [![Windows Setup İndir](https://img.shields.io/badge/%F0%9F%93%A5%20Kurulum%20%C4%B0ndir-Setup.exe-00e676?style=for-the-badge)](https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe)
-[![YouTube Tanıtım Videosu](https://img.shields.io/badge/%E2%96%B6%EF%B8%8F%20YouTube-Tan%C4%B1t%C4%B1m%20Videosu-ef4444?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/ZNEpJisBbEg)
+[![YouTube Tanıtım Videosu](https://img.shields.io/badge/%E2%96%B6%EF%B8%8F%20YouTube-Tan%C4%B1t%C4%B1m%20Videosu-ef4444?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/vqttBAoov00)
 [![Tanıtım ve Kılavuz](https://img.shields.io/badge/%F0%9F%8C%90%20Web%20K%C4%B1lavuz-arapca.muallimun.net-ffd369?style=for-the-badge)](https://arapca.muallimun.net/arapca-telaffuz-asistani/)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3b82f6?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Lisans](https://img.shields.io/badge/Lisans-MIT-eab308?style=for-the-badge)](LICENSE)
@@ -16,11 +16,11 @@
 Uygulamanın tüm modüllerini, yapay zekâ destekli mahreç koçunu, sarf sözlüğünü, yazılı sınav üreticisini ve içerik ekleme adımlarını **7 dakika 50 saniyelik** kapsamlı tanıtım videomuzdan izleyebilirsiniz:
 
 <div align="center">
-  <a href="https://youtu.be/ZNEpJisBbEg" target="_blank">
+  <a href="https://youtu.be/vqttBAoov00" target="_blank">
     <img src="https://img.youtube.com/vi/ZNEpJisBbEg/maxresdefault.jpg" alt="Arapça Telaffuz ve Konuşma Asistanı v40.0 Tanıtım Videosu" width="760" style="border-radius:12px;border:2px solid #ffd369;"/>
   </a>
   <p>
-    ▶️ <b><a href="https://youtu.be/ZNEpJisBbEg">YouTube Tanıtım ve Kullanım Rehberini İzlemek İçin Tıklayın (https://youtu.be/ZNEpJisBbEg)</a></b>
+    ▶️ <b><a href="https://youtu.be/vqttBAoov00">YouTube Tanıtım ve Kullanım Rehberini İzlemek İçin Tıklayın (https://youtu.be/vqttBAoov00)</a></b>
   </p>
 </div>
 
@@ -29,9 +29,9 @@ Uygulamanın tüm modüllerini, yapay zekâ destekli mahreç koçunu, sarf sözl
 | 📥 **Windows Kurulum Paketi (`Setup.exe`)** | **[Arapca_Telaffuz_Asistani_Setup.exe İndir](https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe)** |
 | 🌐 **Web Tanıtım Sayfası & 31 Ekran Galerisi** | **[https://arapca.muallimun.net/arapca-telaffuz-asistani/](https://arapca.muallimun.net/arapca-telaffuz-asistani/)** |
 | 📕 **Resimli PDF Kullanım Kılavuzu (A4)** | **[Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf](https://arapca.muallimun.net/arapca-telaffuz-asistani/Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf)** |
-| 🎬 **YouTube Tanıtım Videosu (07:50 dk)** | **[https://youtu.be/ZNEpJisBbEg](https://youtu.be/ZNEpJisBbEg)** |
-| 🕌 **Geliştirici & Eğitim Portalı** | **[https://www.muallimun.com](https://www.muallimun.com)** |
-
+| 🎬 **YouTube Tanıtım Videosu (07:50 dk)** | **[https://youtu.be/vqttBAoov00](https://youtu.be/vqttBAoov00)** |
+| 🕌 **Geliştirici & Eğitim Portalı** | **[https://www.muallimun.net](https://www.muallimun.net)** |
+> 🛠️ **%100 ÖZELLEŞTİRİLEBİLİR AÇIK İÇERİK MOTORU:** Uygulama kurulduğunda hemen çalışmaya başlanabilmesi için zengin bir başlangıç veri setiyle (hazır görselli kelimeler, sarf sözlüğü, günlük diyaloglar ve anahtar cümleler) birlikte gelir. Ancak programın asıl gücü; **içinde hiçbir veri olmasa bile** kullanıcının veya öğretmenin hiçbir kodlama bilmeden **Excel'den kopyala-yapıştır (`Ctrl+V`), CSV/JSON/ZIP veya doğrudan mikrofon kaydıyla kendi ders kitabını, kendi kelimelerini, diyaloglarını, cümlelerini, görsellerini ve seslerini dakikalar içinde sisteme ekleyip tamamen özelleştirebilmesidir!**
 ---
 
 ## 🌟 Öne Çıkan Özellikler (v40.0)
@@ -179,7 +179,7 @@ Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır. Güvenlik bildirim
 ## 🌐 İletişim ve Bağlantılar
 
 * **Tanıtım & Çevrimiçi Kılavuz:** [arapca.muallimun.net/arapca-telaffuz-asistani](https://arapca.muallimun.net/arapca-telaffuz-asistani/)
-* **YouTube Tanıtım Videosu:** [youtu.be/ZNEpJisBbEg](https://youtu.be/ZNEpJisBbEg)
+* **YouTube Tanıtım Videosu:** [youtu.be/ZNEpJisBbEg](https://youtu.be/vqttBAoov00)
 * **Geliştirici & Eğitim Portalı:** [Muallimun.Net](https://www.muallimun.com)
 * **GitHub Deposu:** [github.com/muallimun/arapca-telaffuz-asistani](https://github.com/muallimun/arapca-telaffuz-asistani)
 * **Sorun Bildirimi & Öneriler:** [GitHub Issues](https://github.com/muallimun/arapca-telaffuz-asistani/issues)
