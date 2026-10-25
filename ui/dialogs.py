@@ -3443,3 +3443,231 @@ def open_quick_edit_sentence(app):
 
     tk.Button(win, text="💾 GÜNCELLE", command=save, bg=GREEN, fg="#0f172a", font=("Segoe UI", 12, "bold"), relief="flat", pady=8, cursor="hand2").pack(fill="x", padx=20, pady=(16, 5))
     tk.Button(win, text="🗑️ SİL", command=delete, bg=RED, fg="white", font=("Segoe UI", 12, "bold"), relief="flat", pady=8, cursor="hand2").pack(fill="x", padx=20)
+    
+# ==============================================================================
+# 7) ℹ️ UYGULAMA HAKKINDA, KILAVUZLAR (PDF / WEB / YOUTUBE) VE SİSTEM BİLGİSİ
+# ==============================================================================
+def open_about_info_window(app):
+    """
+    Global mağaza uygulamaları tarzında 'Uygulama Hakkında ve Kılavuz Merkezi' penceresi.
+    - Üstte: Uygulama ikonu (app_icon.png), sürüm, mimari ve '%100 Özelleştirilebilir İçerik Motoru' bilgisi.
+    - Ortada: 1) YouTube Tanıtım Videosu, 2) Web Tanıtım & Kılavuz Sayfası, 3) PDF Kullanım Kılavuzu kartları.
+    - Altta: Küçük ve şık Muallimun.Net logosu ve web bağlantısı.
+    """
+    c = app.colors
+    is_dark = (app.theme_mode == "dark")
+
+    WEB_GUIDE_URL = "https://arapca.muallimun.net/arapca-telaffuz-asistani/"
+    PDF_GUIDE_URL = "https://arapca.muallimun.net/arapca-telaffuz-asistani/Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf"
+    YOUTUBE_GUIDE_URL = "https://www.youtube.com/watch?v=vqttBAoov00"
+    MUALLIMUN_MAIN_URL = "https://www.muallimun.com"
+
+    win = tk.Toplevel(app.root)
+    win.title(f"ℹ️ Uygulama Hakkında ve Kılavuz Merkezi — v{APP_VERSION}")
+    w_px, h_px = 680, 590
+    sw = win.winfo_screenwidth()
+    sh = win.winfo_screenheight()
+    pos_x = max(0, (sw - w_px) // 2)
+    pos_y = max(0, (sh - h_px) // 2 - 20)
+    win.geometry(f"{w_px}x{h_px}+{pos_x}+{pos_y}")
+    win.minsize(640, 560)
+    win.resizable(False, False)
+    win.configure(bg=c["CARD_COLOR"])
+    win.transient(app.root)
+    win.grab_set()
+
+    if hasattr(app, "_register_singleton_dialog"):
+        app._register_singleton_dialog(win)
+
+    # 1. ÜST BÖLÜM: GLOBAL STORE TARZI UYGULAMA KİMLİK KARTI
+    hero = tk.Frame(win, bg=c["PANEL_COLOR"], padx=22, pady=16, highlightthickness=1, highlightbackground=c["BORDER"])
+    hero.pack(fill="x")
+
+    app_ico_photo = None
+    for ico_cand in (
+        os.path.join(BASE_DIR, "ui", "app_icon.png"),
+        os.path.join(ASSETS_DIR, "app_icon.png")
+    ):
+        if os.path.exists(ico_cand):
+            try:
+                im = Image.open(ico_cand)
+                im.thumbnail((72, 72), Image.LANCZOS)
+                app_ico_photo = ImageTk.PhotoImage(im)
+                break
+            except Exception:
+                pass
+
+    if app_ico_photo:
+        lbl_ico = tk.Label(hero, image=app_ico_photo, bg=c["PANEL_COLOR"])
+        lbl_ico.image = app_ico_photo
+        lbl_ico.pack(side="left", padx=(0, 16))
+
+    title_col = tk.Frame(hero, bg=c["PANEL_COLOR"])
+    title_col.pack(side="left", fill="x", expand=True)
+
+    r_title = tk.Frame(title_col, bg=c["PANEL_COLOR"])
+    r_title.pack(fill="x")
+    tk.Label(
+        r_title, text="Arapça Telaffuz ve Konuşma Asistanı",
+        bg=c["PANEL_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 14, "bold")
+    ).pack(side="left")
+    tk.Label(
+        r_title, text=f" v{APP_VERSION} ",
+        bg=GREEN, fg="#0f172a", font=("Segoe UI", 9, "bold"), padx=6, pady=1
+    ).pack(side="left", padx=8)
+
+    tk.Label(
+        title_col,
+        text="Yapay Zekâ Destekli Mahreç, Sarf Sözlüğü, Diyalog Canlandırma ve Sınav Üretim Platformu",
+        bg=c["PANEL_COLOR"], fg=c["TEXT_MAIN"], font=("Segoe UI", 9, "bold"), anchor="w"
+    ).pack(fill="x", pady=(3, 2))
+
+    tk.Label(
+        title_col,
+        text="✨ %100 Özelleştirilebilir İçerik Motoru: Hazır veri setlerinin yanı sıra kullanıcılar kendi kelime,\n"
+             "   diyalog, cümle, görsel ve ses paketlerini kod yazmadan kolayca ekleyip özelleştirebilir.",
+        bg=c["PANEL_COLOR"], fg=c["TEXT_DIM"], font=("Segoe UI", 8, "bold"), justify="left", anchor="w"
+    ).pack(fill="x")
+
+    # 2. ORTA BÖLÜM: 3 ANA KILAVUZ VE TANITIM BAĞLANTISI (YOUTUBE / WEB / PDF)
+    body = tk.Frame(win, bg=c["CARD_COLOR"], padx=22, pady=12)
+    body.pack(fill="both", expand=True)
+
+    tk.Label(
+        body, text="📚 RESMÎ KILAVUZLAR, TANITIM VİDEOSU VE EĞİTİM KAYNAKLARI",
+        bg=c["CARD_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w", pady=(0, 8))
+
+    def _open_pdf_guide():
+        local_candidates = [
+            os.path.join(BASE_DIR, "Kilavuz_ve_Tanitim", "Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf"),
+            os.path.join(BASE_DIR, "Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf"),
+            os.path.join(DATA_DIR, "Arapca_Telaffuz_Asistani_Kullanim_Kilavuzu.pdf"),
+        ]
+        for lp in local_candidates:
+            if os.path.exists(lp):
+                webbrowser.open("file:///" + os.path.abspath(lp).replace("\\", "/"))
+                return
+        webbrowser.open(PDF_GUIDE_URL)
+
+    guide_cards = [
+        (
+            "🎬 YouTube Sesli & Görüntülü Tanıtım ve Kullanım Rehberi",
+            "Uygulamanın tüm ekranlarını, mahreç koçunu ve paket hazırlama adımlarını anlatan video rehber.",
+            "▶️ YouTube Videosunu İzle",
+            RED, "white",
+            lambda: webbrowser.open(YOUTUBE_GUIDE_URL)
+        ),
+        (
+            "🌐 Web Tanıtım Sayfası ve Çevrimiçi Görsel Kılavuz",
+            "Modül açıklamalarını, ekran galerisini, paket şablonlarını ve güncel kurulum bağlantısını içeren web sayfası.",
+            "🌐 Web Sayfasını Aç",
+            BLUE, "white",
+            lambda: webbrowser.open(WEB_GUIDE_URL)
+        ),
+        (
+            "📕 Kapsamlı PDF Kullanım ve Paket Hazırlama Kılavuzu (A4 Kitapçık)",
+            "Tüm ekranların detaylı anlatımını ve içerik üreticileri için Excel/CSV/JSON paket şablonlarını içeren PDF kitapçık.",
+            "📕 PDF Kılavuzu Aç",
+            "#0d9488", "white",
+            _open_pdf_guide
+        )
+    ]
+
+    for g_title, g_desc, btn_txt, btn_bg, btn_fg, btn_cmd in guide_cards:
+        row_c = tk.Frame(
+            body, bg=c["BG_COLOR"], padx=14, pady=10,
+            highlightthickness=1, highlightbackground=c["BORDER"]
+        )
+        row_c.pack(fill="x", pady=4)
+
+        left_txt = tk.Frame(row_c, bg=c["BG_COLOR"])
+        left_txt.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        tk.Label(
+            left_txt, text=g_title, bg=c["BG_COLOR"], fg=c["ACCENT_HEAD"],
+            font=("Segoe UI", 10, "bold"), anchor="w"
+        ).pack(fill="x")
+        tk.Label(
+            left_txt, text=g_desc, bg=c["BG_COLOR"], fg=c["TEXT_DIM"],
+            font=("Segoe UI", 8), anchor="w", justify="left", wraplength=420
+        ).pack(fill="x", pady=(2, 0))
+
+        tk.Button(
+            row_c, text=btn_txt, command=btn_cmd,
+            bg=btn_bg, fg=btn_fg, font=("Segoe UI", 9, "bold"),
+            relief="flat", padx=12, pady=6, cursor="hand2", width=21
+        ).pack(side="right")
+
+    # Hızlı Uygulama İçi Araçlar Satırı
+    quick_row = tk.Frame(body, bg=c["CARD_COLOR"])
+    quick_row.pack(fill="x", pady=(10, 4))
+
+    tk.Button(
+        quick_row, text="📖 Uygulama İçi Rehber (F1)",
+        command=lambda: (win.destroy(), open_user_guide_window(app)),
+        bg=c["BTN_SEC"], fg=c["TEXT_MAIN"], font=("Segoe UI", 9, "bold"),
+        relief="flat", padx=10, pady=5, cursor="hand2"
+    ).pack(side="left", padx=(0, 4))
+
+    tk.Button(
+        quick_row, text="👋 7 Adımlı Başlangıç Turu",
+        command=lambda: (win.destroy(), open_onboarding_tour(app, force_show=True)),
+        bg=c["BTN_SEC"], fg=c["TEXT_MAIN"], font=("Segoe UI", 9, "bold"),
+        relief="flat", padx=10, pady=5, cursor="hand2"
+    ).pack(side="left", padx=4)
+
+    tk.Button(
+        quick_row, text="🔄 Güncellemeleri Denetle",
+        command=lambda: (win.destroy(), open_updater_window(app)),
+        bg=c["BTN_SEC"], fg=c["TEXT_MAIN"], font=("Segoe UI", 9, "bold"),
+        relief="flat", padx=10, pady=5, cursor="hand2"
+    ).pack(side="left", padx=4)
+
+    tk.Button(
+        quick_row, text="📦 GitHub",
+        command=lambda: webbrowser.open(GITHUB_REPO_URL),
+        bg=PURPLE, fg="white", font=("Segoe UI", 9, "bold"),
+        relief="flat", padx=10, pady=5, cursor="hand2"
+    ).pack(side="right")
+
+    # 3. ALT BÖLÜM: ŞIK VE KOMPAKT MUALLİMUN.NET İMZA BARI + KAPAT BUTONU
+    footer = tk.Frame(win, bg=c["PANEL_COLOR"], padx=20, pady=8, highlightthickness=1, highlightbackground=c["BORDER"])
+    footer.pack(fill="x", side="bottom")
+
+    brand_box = tk.Frame(footer, bg=c["PANEL_COLOR"], cursor="hand2")
+    brand_box.pack(side="left")
+    brand_box.bind("<Button-1>", lambda e: webbrowser.open(MUALLIMUN_MAIN_URL))
+
+    m_logo_photo = None
+    for m_cand in (
+        os.path.join(BASE_DIR, "ui", "muallimun_logo.png"),
+        os.path.join(ASSETS_DIR, "muallimun_logo.png")
+    ):
+        if os.path.exists(m_cand):
+            try:
+                mim = Image.open(m_cand)
+                mim.thumbnail((22, 22), Image.LANCZOS)
+                m_logo_photo = ImageTk.PhotoImage(mim)
+                break
+            except Exception:
+                pass
+
+    if m_logo_photo:
+        lbl_ml = tk.Label(brand_box, image=m_logo_photo, bg=c["PANEL_COLOR"], cursor="hand2")
+        lbl_ml.image = m_logo_photo
+        lbl_ml.pack(side="left", padx=(0, 6))
+        lbl_ml.bind("<Button-1>", lambda e: webbrowser.open(MUALLIMUN_MAIN_URL))
+
+    lbl_m_txt = tk.Label(
+        brand_box,
+        text="Geliştirici & Eğitim Portalı: www.muallimun.com  |  MIT Açık Kaynak Lisansı",
+        bg=c["PANEL_COLOR"], fg=c["ACCENT_HEAD"], font=("Segoe UI", 8, "bold", "underline"), cursor="hand2"
+    )
+    lbl_m_txt.pack(side="left")
+    lbl_m_txt.bind("<Button-1>", lambda e: webbrowser.open(MUALLIMUN_MAIN_URL))
+
+    tk.Button(
+        footer, text="Kapat", command=win.destroy,
+        bg=GREEN, fg="#0f172a", font=("Segoe UI", 9, "bold"),
+        relief="flat", padx=18, pady=4, cursor="hand2"
+    ).pack(side="right")

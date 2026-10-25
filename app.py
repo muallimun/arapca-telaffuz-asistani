@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Arapça Telaffuz ve Konuşma Asistanı — Premium v40 Gold Master (Muallimun.Net Tam Sürüm)
+Arapça Telaffuz ve Konuşma Asistanı — (Muallimun.Net Tam Sürüm)
 Repo: https://github.com/muallimun/arapca-telaffuz-asistani
 - 🔄 GitHub Üzerinden Arka Planda Otomatik Sürüm Kontrolü ve Tek Tıkla Güncelleme
 - 🪟 Tekil Harici Pencere Yöneticisi (Yeni Pencere Açılınca Öncekini Otomatik Kapatma)
@@ -78,7 +78,8 @@ from ui.dialogs import (
     open_shadowing_trainer_window, open_listening_warmup_window,
     open_onboarding_tour, open_dictionary_explorer_window,
     open_printable_worksheet_generator,
-    get_recordings_stats, cleanup_recordings_folder
+    get_recordings_stats, cleanup_recordings_folder,
+    open_about_info_window
 )
 
 MUALLIMUN_URL = "https://www.muallimun.com"
@@ -380,6 +381,21 @@ class App(DialogueModeMixin):
                     log_error("Logo yükleme hatası", ex)
         return None
 
+    def _load_app_icon_logo(self, size=(30, 30)):
+        for candidate in (
+            os.path.join(BASE_DIR, "ui", "app_icon.png"),
+            os.path.join(ASSETS_DIR, "app_icon.png"),
+            os.path.join(BASE_DIR, "ui", "muallimun_logo.png")
+        ):
+            if os.path.exists(candidate):
+                try:
+                    img = Image.open(candidate)
+                    img.thumbnail(size, Image.LANCZOS)
+                    return ImageTk.PhotoImage(img)
+                except Exception as ex:
+                    log_error("Uygulama ikonu yükleme hatası", ex)
+        return None
+
     @staticmethod
     def _open_brand_website(event=None):
         try:
@@ -491,7 +507,7 @@ class App(DialogueModeMixin):
         self.root.configure(bg=bg)
         self.top_bar.configure(bg=bg)
         self.brand_top_frame.configure(bg=bg)
-        self.lbl_brand_top.configure(bg=bg, fg=head_col)
+        self.lbl_brand_top.configure(bg=btn_sec, fg=head_col)
         if self.lbl_logo_top:
             self.lbl_logo_top.configure(bg=bg)
 
@@ -603,6 +619,10 @@ class App(DialogueModeMixin):
             self.lbl_logo_footer.configure(bg=panel)
 
         self.btn_guide.configure(bg=btn_sec, fg=head_col)
+        self.btn_guide.configure(bg=btn_sec, fg=head_col)
+        if hasattr(self, "btn_info"):
+            self.btn_info.configure(bg=btn_sec, fg=head_col)
+            
         if not (self._latest_update_info and self._latest_update_info.get("has_update")):
             self.btn_update.configure(bg=btn_sec, fg=head_col)
         self.btn_toggle_panel.configure(bg=btn_sec, fg=txt)
@@ -762,24 +782,15 @@ class App(DialogueModeMixin):
         btn_top_rep.pack(side="left", padx=3)
         self._attach_tooltip(btn_top_rep, "Başarı rozetlerini, gelişim karnesini ve öğrenci ses kayıtlarını görüntüler.")
 
-        # Üst Bar Sağ Köşe: Muallimun.Net Tıklanabilir Marka & Logo Rozeti
-        self.brand_top_frame = tk.Frame(self.top_bar, bg=BG_COLOR, cursor="hand2")
-        self.brand_top_frame.pack(side="right", padx=(10, 0))
-        self.brand_top_frame.bind("<Button-1>", self._open_brand_website)
+        # Üst Bar Sağ Köşe: Sadece Dekoratif Uygulama Logosu (Tıklamasız)
+        self.brand_top_frame = tk.Frame(self.top_bar, bg=BG_COLOR)
+        self.brand_top_frame.pack(side="right", padx=(8, 0))
 
-        self.logo_photo_top = self._load_brand_logo((30, 30))
+        self.logo_photo_top = self._load_app_icon_logo((30, 30))
         self.lbl_logo_top = None
         if self.logo_photo_top:
-            self.lbl_logo_top = tk.Label(self.brand_top_frame, image=self.logo_photo_top, bg=BG_COLOR, cursor="hand2")
-            self.lbl_logo_top.pack(side="left", padx=(0, 5))
-            self.lbl_logo_top.bind("<Button-1>", self._open_brand_website)
-
-        self.lbl_brand_top = tk.Label(
-            self.brand_top_frame, text="Muallimun.Net", bg=BG_COLOR, fg=YELLOW,
-            font=("Segoe UI", 11, "bold", "underline"), cursor="hand2"
-        )
-        self.lbl_brand_top.pack(side="left")
-        self.lbl_brand_top.bind("<Button-1>", self._open_brand_website)
+            self.lbl_logo_top = tk.Label(self.brand_top_frame, image=self.logo_photo_top, bg=BG_COLOR)
+            self.lbl_logo_top.pack(side="left", padx=(0, 2))
 
         self.btn_toggle_panel = tk.Button(
             self.top_bar, text="◧ Paneli Gizle", command=self._toggle_right_panel,
@@ -795,6 +806,17 @@ class App(DialogueModeMixin):
         )
         self.btn_update.pack(side="right", padx=3)
         self._attach_tooltip(self.btn_update, f"🔄 Otomatik Güncelleme ve Sürüm Merkezi (Kurulu: v{APP_VERSION})")
+
+        # İkonlu Kompakt Hakkında & Kılavuz Merkezi Butonu
+        self.lbl_brand_top = tk.Button(
+            self.top_bar, text="ℹ️", command=lambda: open_about_info_window(self),
+            bg="#233554", fg=YELLOW, font=("Segoe UI", 12, "bold"), relief="flat", width=3, pady=3, cursor="hand2"
+        )
+        self.lbl_brand_top.pack(side="right", padx=3)
+        self._attach_tooltip(
+            self.lbl_brand_top,
+            "ℹ️ Uygulama Hakkında ve Kılavuzlar (YouTube Videosu • Web Sayfası • PDF Kılavuz)"
+        )
 
         # İkonlu Kompakt Kılavuz Butonu
         self.btn_guide = tk.Button(

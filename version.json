@@ -1,17 +1,14 @@
 {
   "version": "40.0",
   "release_date": "2026-10-24",
-  "repo": "muallimun/arapca-telaffuz-asistani",
-  "release_url": "https://github.com/muallimun/arapca-telaffuz-asistani/releases",
+  "release_url": "https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest",
+  "installer_url": "https://github.com/muallimun/arapca-telaffuz-asistani/releases/latest/download/Arapca_Telaffuz_Asistani_Setup.exe",
   "download_url": "https://github.com/muallimun/arapca-telaffuz-asistani/archive/refs/heads/main.zip",
-  "installer_url": "",
   "changelog": [
-    "🎉 v40.0 Gold Master (Final) Sürümü Yayınlandı!",
-    "👤 İlk açılışta Öğrenci/Kullanıcı Adı kaydı (ayarlar.db) ve öğrenci adının Ana Ekran, Raporlar, CSV ve Ödev (.ZIP) karnelerine otomatik işlenmesi eklendi.",
-    "📖 Diyalog ve Cümleler için A4 'Ders Notu / Okuma Metni (Handout)' PDF üretici (Yan Yana, Alt Alta, Sonda Toplu ve Harekeli/Harekesiz) eklendi.",
-    "🖨️ Yazılı Sınav üreticiye Karma Kaynak (Kelime + Diyalog + Cümle birlikte), ayrık kelime havuzu ve 2x2 hizalı test şıkları eklendi.",
-    "📋 Yönetim Paneline Excel'den Kopyala-Yapıştır (Clipboard), Detaylı Yükleme Raporu, Toplu Medya Klasörü Eşleştirici ve 7 bölümlü Paket Rehberi eklendi.",
-    "🔤 Yönetim Paneli ve Sarf Sözlüğü tablolarına sütun başlığına tıklayarak A➔Z / Z➔A sıralama ve çoklu seçimle toplu seviye atama eklendi.",
-    "🔄 GitHub (muallimun/arapca-telaffuz-asistani) üzerinden Otomatik Sürüm Kontrolü ve Tek Tıkla Güncelleme sistemi entegre edildi."
+    "v40.0 Gold Master kurumsal sürüm yayınlandı.",
+    "Görselli Kelime Modu, Gölgeleme (Shadowing) ve SM-2 Aralıklı Tekrar sistemi eklendi.",
+    "1.500+ kelimelik Sarf Sözlüğü ve Sülâsî Kök Ailesi Atölyesi entegre edildi.",
+    "Günlük Diyaloglar (Muhâdesât) ve Karşılıklı Rol Yapma (Roleplay) özelliği eklendi.",
+    "A4 Yazılı Sınav, Karma Quiz ve Temiz Ders Notu (Okuma Metni) PDF/HTML üretici eklendi."
   ]
 }

@@ -1,0 +1,36 @@
+[2026-10-25 11:06:31] Ana uygulama çökme hatası
+Traceback (most recent call last):
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 2561, in <module>
+    app = App(root)
+          ^^^^^^^^^
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 244, in __init__
+    self._build_ui()
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 807, in _build_ui
+    self.lbl_logo_footer = tk.Label(self.brand_footer_frame, image=self.logo_photo_footer, bg=PANEL_COLOR, cursor="hand2")
+                                    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'App' object has no attribute 'brand_footer_frame'. Did you mean: 'brand_top_frame'?
+
+[2026-10-25 11:06:48] Ana uygulama çökme hatası
+Traceback (most recent call last):
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 2561, in <module>
+    app = App(root)
+          ^^^^^^^^^
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 244, in __init__
+    self._build_ui()
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 807, in _build_ui
+    self.lbl_logo_footer = tk.Label(self.brand_footer_frame, image=self.logo_photo_footer, bg=PANEL_COLOR, cursor="hand2")
+                                    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'App' object has no attribute 'brand_footer_frame'. Did you mean: 'brand_top_frame'?
+
+[2026-10-25 11:07:23] Ana uygulama çökme hatası
+Traceback (most recent call last):
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 2561, in <module>
+    app = App(root)
+          ^^^^^^^^^
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 244, in __init__
+    self._build_ui()
+  File "E:\python_denemeleri\arapca_telaffuz_prog\app.py", line 807, in _build_ui
+    self.lbl_logo_footer = tk.Label(self.brand_footer_frame, image=self.logo_photo_footer, bg=PANEL_COLOR, cursor="hand2")
+                                    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'App' object has no attribute 'brand_footer_frame'. Did you mean: 'brand_top_frame'?
+
