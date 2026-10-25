@@ -36,7 +36,7 @@ if os.path.exists(icon_png):
 
 # 2. Lisans Sözleşmesi Metni (UTF-8 BOM)
 lisans_metni = """========================================================================
-ARAPÇA TELAFFUZ VE KONUŞMA ASİSTANI (v40.0 Gold Master)
+ARAPÇA TELAFFUZ VE KONUŞMA ASİSTANI
 KULLANIM VE LİSANS SÖZLEŞMESİ — MUALLİMUN.NET
 ========================================================================
 
@@ -68,7 +68,7 @@ tanitim_metni = """=============================================================
 🌟 ARAPÇA TELAFFUZ VE KONUŞMA ASİSTANI'NA HOŞ GELDİNİZ!
 ========================================================================
 
-Bu kurulum sihirbazı, "Arapça Telaffuz ve Konuşma Asistanı (v40.0)"
+Bu kurulum sihirbazı, "Arapça Telaffuz ve Konuşma Asistanı"
 uygulamasını bilgisayarınıza kuracaktır.
 
 ------------------------------------------------------------------------
@@ -154,7 +154,7 @@ else:
 
 iss_content = f"""; =====================================================================
 ; Inno Setup 6 Profesyonel Kurulum Betiği (installer.iss)
-; Uygulama : Arapça Telaffuz ve Konuşma Asistanı v40.0 Gold Master
+; Uygulama : Arapça Telaffuz ve Konuşma Asistanı 
 ; Yayıncı  : Muallimun.Net (https://www.muallimun.com)
 ; =====================================================================
 

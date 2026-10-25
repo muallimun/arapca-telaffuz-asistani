@@ -1,6 +1,6 @@
 ﻿; =====================================================================
 ; Inno Setup 6 Profesyonel Kurulum Betiği (installer.iss)
-; Uygulama : Arapça Telaffuz ve Konuşma Asistanı v40.0 Gold Master
+; Uygulama : Arapça Telaffuz ve Konuşma Asistanı 
 ; Yayıncı  : Muallimun.Net (https://www.muallimun.com)
 ; =====================================================================
 

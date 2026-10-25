@@ -2,7 +2,7 @@
 🌟 ARAPÇA TELAFFUZ VE KONUŞMA ASİSTANI'NA HOŞ GELDİNİZ!
 ========================================================================
 
-Bu kurulum sihirbazı, "Arapça Telaffuz ve Konuşma Asistanı (v40.0)"
+Bu kurulum sihirbazı, "Arapça Telaffuz ve Konuşma Asistanı"
 uygulamasını bilgisayarınıza kuracaktır.
 
 ------------------------------------------------------------------------
